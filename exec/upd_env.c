@@ -43,5 +43,6 @@ char	**upd_env(t_env *env_list)
 		env_list = env_list->next;
 		i++;
 	}
+	u_env[i] = NULL;
 	return (u_env);
 }
