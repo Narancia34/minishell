@@ -6,7 +6,7 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 13:49:55 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/04/22 16:15:04 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/04/27 15:52:10 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -84,7 +84,7 @@ void        print_commands(t_command *cmd);
 
 
 char	*find_cmd_path(char *full_cmd, char **envp);
-void	exec_cmd(char **args, char **envp, char **o_args);
+void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe);
 void	check_input(t_command *input, t_env *env_list, char **envp);
 void	exec_builtin(char **arg, t_env *env_list, char **o_args);
 int	is_builtin(char *arg);
@@ -95,5 +95,8 @@ void	ft_pwd();
 void	ft_env(t_env *env_list);
 int	redirect_in(char **args);
 char	**upd_env(t_env *env_list);
+void	handle_pipeline(t_command *input, t_env *env_list, char **envp);
+char	**get_cmd(char **o_args);
+void	ft_unset(char **args, t_env **env_list);
 
 #endif

@@ -87,3 +87,42 @@ void	ft_env(t_env *env_list)
 		tmp = tmp->next;
 	}
 }
+
+static void remove_env_var(t_env **env_list, char *var_name)
+{
+	t_env *current = *env_list;
+
+	while (current)
+	{
+		if (ft_strcmp(current->var_name, var_name) == 0)
+		{
+			if (current->prev)
+				current->prev->next = current->next;
+			else
+				*env_list = current->next;
+			if (current->next)
+				current->next->prev = current->prev;
+			free(current->var_name);
+			free(current->var_value);
+			free(current);
+			return;
+		}
+		current = current->next;
+	}
+}
+
+void	ft_unset(char **args, t_env **env_list)
+{
+	int	i;
+
+	if (!args || !args[0] || !env_list || !*env_list)
+		return;
+
+	i = 1;
+	while (args[i])
+	{
+		remove_env_var(env_list, args[i]);
+		i++;
+	}
+}
+

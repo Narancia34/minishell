@@ -52,6 +52,8 @@ void	exec_builtin(char **arg, t_env *env_list, char **o_args)
 		ft_env(env_list);
 	if (ft_strcmp("exit", arg[0]) == 0)
 		exit(0);
+	if (ft_strcmp(arg[0], "unset") == 0)
+		ft_unset(arg, &env_list);
 	dup2(saved_stdout, STDOUT_FILENO);
 	dup2(saved_stdin, STDIN_FILENO);
 	close(saved_stdout);
