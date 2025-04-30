@@ -48,6 +48,7 @@ void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe)
 	}
 	else
 {
+		redirect_in(o_args);
 		cmd_path = find_cmd_path(args[0], envp);
 		handle_exec(cmd_path, args, envp);
 	}
