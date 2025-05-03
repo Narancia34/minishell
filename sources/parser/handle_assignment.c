@@ -1,21 +1,21 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   handle_var_ass.c                                   :+:      :+:    :+:   */
+/*   handle_assignment.c                                :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mlabrirh <mlabrirh@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2025/04/12 12:23:31 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/04/12 12:34:20 by mlabrirh         ###   ########.fr       */
+/*   Created: 2025/04/21 10:59:54 by mlabrirh          #+#    #+#             */
+/*   Updated: 2025/04/24 19:57:47 by mlabrirh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "../includes/minishell.h"
+#include "../../includes/minishell.h"
 
-bool	is_variable_assignment(const char *str)
+bool	is_variable_assignment(char *str)
 {
 	int	i;
-	
+
 	if (!str || !*str)
 		return (false);
 	if (!ft_isalpha(str[0]) && str[0] != '_')
@@ -29,7 +29,6 @@ bool	is_variable_assignment(const char *str)
 	}
 	if (str[i] != '=')
 		return (false);
-	
 	return (true);
 }
 
@@ -43,7 +42,6 @@ t_env	*find_env_var(t_env *env_list, const char *var_name)
 	}
 	return (NULL);
 }
-
 
 int	ft_env_var(t_env **env_list, char **parts)
 {
@@ -60,22 +58,26 @@ int	ft_env_var(t_env **env_list, char **parts)
 			existing->var_value = NULL;
 		return (1);
 	}
-	else if ((new = new_node(parts)))
+	else
 	{
+		new = new_node(parts);
+		if (new)
+		{
 			new->exported = 0;
 			add_node(env_list, new);
 			return (1);
+		}
+		else
+			return (0);
 	}
-	else
-		return (0);
 }
 
 int	handle_assignment(t_env **env_list, const char *assignment)
 {
 	char	**parts;
 	int		result;
-	
-	if (!is_variable_assignment(assignment))
+
+	if (!is_variable_assignment((char *)assignment))
 		return (0);
 	parts = ft_split(assignment, '=');
 	if (!parts)

@@ -28,7 +28,12 @@
 # include <sys/wait.h>
 # include "../libft/libft.h"
 
-
+typedef enum e_quote_type
+{
+	QUOTE_NONE,
+	QUOTE_SINGLE,
+	QUOTE_DOUBLE
+} t_quote_type;
 
 typedef enum
 {
@@ -37,7 +42,8 @@ typedef enum
 	TOKEN_REDIR_IN,
 	TOKEN_PIPE,
 	TOKEN_REDIR_APPEND,
-	TOKEN_HEREDOC
+	TOKEN_HEREDOC,
+	TOKEN_ASSIGNMENT
 } token_type;
 
 typedef struct s_token
@@ -65,27 +71,47 @@ typedef struct s_env
 	struct s_env	*next;
 	struct s_env	*prev;
 } t_env;
+
+void check_and_set_assignment(t_token *token);
 // init env in a stack
 t_env	*init_env(char	**env);
 void	add_node(t_env **env_list, t_env *new_n);
 t_env	*new_node(char **variable);
 
-t_token	*ft_add_token(t_token **token_list, char *value, token_type type);
-bool validate_syntax(t_token *tokens);
-bool	is_variable_assignment(const char *str);
+//expander
 t_env	*find_env_var(t_env *env_list, const char *var_name);
-int	handle_assignment(t_env **env_list, const char *assignment);
-char *get_env_value(t_env *env_list, const char *var_name);
-t_token    *tokenize(const char *line);
-t_command  *build_commands(t_token *tokens);
-char *expand_input(char *input, int exit_status, t_env *env_list);
-void        print_tokens(t_token *list);
-void        print_commands(t_command *cmd);
+char	*strjoin_and_free(char *s1, char *s2);
+char	*expand_env_vars(char *input, int exit_status, t_env *env_list);
+char	*remove_quotes(char *input);
+bool	is_variable_assignment(char *str);
+char	*expand_tilde(char *input);
+char	*get_env_value(t_env *env_list, const char *var_name);
+char	*expand_input(char *input, int exit_status, t_env *env_list);
 
+//tokens
+t_token		*ft_add_token(t_token **token_list, char *value, token_type type);
+t_token	*tokenize(const char *input);
+t_command	*build_commands(t_token *tokens);
+void	set_size(t_command *head);
+void	set_type(t_command *head);
+char *read_quoted(char *input, int *i);
+char	**ft_realloc(char *arg, char **old_arr);
+char *read_operator(const char *str, int *i);
+char *read_word(const char *str, int *i);
+token_type	get_operation_type(const char *op);
 
+//check syntax
+bool	validate_syntax(t_token *tokens);
+
+//assignment
+int		handle_assignment(t_env **env_list, const char *assignment);
+void	print_commands(t_command *cmd);   // Optional for debug
+void	print_tokens(t_token *list);      // Optional for debug
+
+//execution part
 char	*find_cmd_path(char *full_cmd, char **envp);
 void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe);
-void	check_input(t_command *input, t_env *env_list, char **envp);
+void	check_input(t_command *input, t_env *env_list, char **envp, t_token *token);
 void	exec_builtin(char **arg, t_env *env_list, char **o_args);
 int	is_builtin(char *arg);
 void	clean_up(char *str, char **strs);
@@ -98,5 +124,7 @@ char	**upd_env(t_env *env_list);
 void	handle_pipeline(t_command *input, t_env *env_list, char **envp);
 char	**get_cmd(char **o_args);
 void	ft_unset(char **args, t_env **env_list);
+
+
 
 #endif

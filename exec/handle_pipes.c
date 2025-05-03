@@ -67,6 +67,7 @@ void	handle_pipeline(t_command  *input, t_env *env_list, char **envp)
 				exec_builtin(args, env_list, tmp->args);
 			else
 				exec_cmd(args, envp, tmp->args, 1);
+			exit(1);
 		}
 		else
 			handle_pipe_util_b(&prev_fd, fd);
