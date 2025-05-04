@@ -42,7 +42,10 @@ int main(int ac, char **av, char **env)
 	char *expanded_input;
 	t_env	*env_list;
 	char	**u_env;
+	t_var	*var_list;
+
 	env_list = init_env(env);
+	var_list = NULL;
 	while (1)
 	{
 		input = readline("minishell$ ");
@@ -67,7 +70,7 @@ int main(int ac, char **av, char **env)
 		}
 		t_command *commands = build_commands(tokens);
 		u_env = upd_env(env_list);
-		check_input(commands, env_list, u_env, tokens);
+		check_input(commands, env_list, u_env, tokens, var_list);
 		/*clean_up(input, u_env);*/
 		// while(commands)
 		// {

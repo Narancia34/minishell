@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 14:11:27 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/04/29 14:16:00 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/05/03 18:27:47 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -61,7 +61,7 @@ char	**get_cmd(char **o_args)
 	return (args);
 }
 
-void	check_input(t_command *input, t_env *env_list, char **envp, t_token *tokens)
+void	check_input(t_command *input, t_env *env_list, char **envp, t_token *tokens, t_var *var_list)
 {
 	t_command	*tmp;
 	t_token	*tmp_t;
@@ -83,7 +83,7 @@ void	check_input(t_command *input, t_env *env_list, char **envp, t_token *tokens
 				continue;
 			}
 			if (tmp_t->type == 6)
-				printf("var_assign\n");
+				handle_var(var_list, tmp->args[0]);
 			else if (is_builtin(args[0]) == 1)
 				exec_builtin(args, env_list, tmp->args);
 			else
