@@ -52,7 +52,7 @@ void	add_to_list(t_var **var_list, t_var *new)
 	current->next = new;
 }
 
-void	handle_var(t_var *var_list, char *arg)
+void	handle_var(t_var **var_list, char *arg)
 {
 	char	*var_name;
 	char	*var_value;
@@ -75,5 +75,5 @@ void	handle_var(t_var *var_list, char *arg)
 	}
 	var_name[j] = '\0';
 	new = make_node(var_name, var_value);
-	add_to_list(&var_list, new);
+	add_to_list(var_list, new);
 }

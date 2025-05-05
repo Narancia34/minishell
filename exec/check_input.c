@@ -61,7 +61,7 @@ char	**get_cmd(char **o_args)
 	return (args);
 }
 
-void	check_input(t_command *input, t_env *env_list, char **envp, t_token *tokens, t_var *var_list)
+void	check_input(t_command *input, t_env *env_list, char **envp, t_token *tokens, t_var **var_list)
 {
 	t_command	*tmp;
 	t_token	*tmp_t;

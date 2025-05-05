@@ -124,7 +124,7 @@ void	print_tokens(t_token *list);      // Optional for debug
 //execution part
 char	*find_cmd_path(char *full_cmd, char **envp);
 void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe);
-void	check_input(t_command *input, t_env *env_list, char **envp, t_token *token, t_var *var_list);
+void	check_input(t_command *input, t_env *env_list, char **envp, t_token *token, t_var **var_list);
 void	exec_builtin(char **arg, t_env *env_list, char **o_args);
 int	is_builtin(char *arg);
 void	clean_up(char *str, char **strs);
@@ -137,7 +137,7 @@ char	**upd_env(t_env *env_list);
 void	handle_pipeline(t_command *input, t_env *env_list, char **envp);
 char	**get_cmd(char **o_args);
 void	ft_unset(char **args, t_env **env_list);
-void	handle_var(t_var *var_list, char *arg);
+void	handle_var(t_var **var_list, char *arg);
 
 
 

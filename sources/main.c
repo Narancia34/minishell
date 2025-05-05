@@ -70,19 +70,7 @@ int main(int ac, char **av, char **env)
 		}
 		t_command *commands = build_commands(tokens);
 		u_env = upd_env(env_list);
-		check_input(commands, env_list, u_env, tokens, var_list);
-		/*clean_up(input, u_env);*/
-		// while(commands)
-		// {
-		// 	if (commands->type == TOKEN_WORD)
-		// 		printf("this token is a pipe\n");
-		// 	commands = commands->next;
-		// }
-		//print_tokens(tokens);
-		//print_commands(commands);
-
-		// Free tokens and commands after use
-		// Freeing logic should be added here
+		check_input(commands, env_list, u_env, tokens, &var_list);
 	}
 	return 0;
 }
