@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 09:47:37 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/05/03 19:06:06 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/04/11 09:49:17 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -88,7 +88,7 @@ void	ft_env(t_env *env_list)
 	}
 }
 
-static void remove_env_var(t_env **env_list, char *var_name)
+void remove_env_var(t_env **env_list, char *var_name)
 {
 	t_env *current = *env_list;
 
@@ -125,4 +125,3 @@ void	ft_unset(char **args, t_env **env_list)
 		i++;
 	}
 }
-

@@ -63,7 +63,8 @@ char	*cat_path_cmd(char *pre_path, char *full_cmd)
 	char	*tmp;
 	char	*cmd;
 
-	cmd = get_command(full_cmd);
+	//cmd = get_command(full_cmd);
+	cmd = ft_strdup(full_cmd);
 	if (!cmd)
 		return (NULL);
 	tmp = ft_strjoin(pre_path, "/");
@@ -82,7 +83,7 @@ char	*check_access(char **pre_paths, char *full_cmd)
 	while (pre_paths[i])
 	{
 		res = cat_path_cmd(pre_paths[i], full_cmd);
-		if (res && access(res, X_OK) == 0)
+		if (res && access(res, F_OK) == 0)
 			return (clean_up(NULL, pre_paths), res);
 		free(res);
 		i++;
@@ -98,7 +99,7 @@ char	*find_cmd_path(char *full_cmd, char **envp)
 
 	if (!full_cmd || !*full_cmd)
 		return (NULL);
-	if (access(full_cmd, X_OK) == 0)
+	if (access(full_cmd, F_OK) == 0)
 		return (ft_strdup(full_cmd));
 	if (full_cmd[0] == '.' || full_cmd[0] == '/')
 		return (NULL);

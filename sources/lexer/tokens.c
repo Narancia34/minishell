@@ -11,13 +11,28 @@
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
+#include <stdlib.h>
+
+static bool ft_have_a_quote(const char *input, int *i)
+{
+	int j = (*i);
+	while(input[j])
+	{
+		if (input[j] == '\'' || input[j] == '\"')
+			return true;
+		else if (input[j] == ' ')
+			return false;
+		j++;
+	}
+	return false;
+}
 
 static	void	tokenize_next(const char *input, int *i, t_token **token_list)
 {
 	char			*content;
 	token_type		type;
 
-	if (input[*i] == '\'' || input[*i] == '\"')
+	if (ft_have_a_quote(input, i))
     {
         content = read_quoted((char *)input, i);
         if (!content)

@@ -12,7 +12,11 @@
 
 #include "libft.h"
 
+<<<<<<<< HEAD:libft/ft_strndup.c
 char	*ft_strndup(const char *s, size_t n)
+========
+t_token	*ft_add_token(t_token **token_list, char *value, token_type type)
+>>>>>>>> main:sources/utils_token.c
 {
 	char			*res;
 	unsigned int	i;

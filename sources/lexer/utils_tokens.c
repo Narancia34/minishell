@@ -35,23 +35,37 @@ t_token	*ft_add_token(t_token **token_list, char *value, token_type type)
 	return (new_token);
 }
 
-
-char *read_quoted(char *input, int *i)
+char	*read_quoted(char *input, int *i)
 {
-    char quote = input[*i];
-    int start = ++(*i);
+	char	*result = malloc(strlen(input) + 1);
+	int		j = 0;
+	char	quote;
 
-    while (input[*i] && input[*i] != quote)
-        (*i)++;
-    if (input[*i] != quote)
-    {
-        ft_putstr_fd("minishell: syntax error: unclosed quote\n",STDERR_FILENO);
-        return (NULL);
-    }
-    int len = *i - start;
-    char *res = ft_strndup(&input[start], len);
-    (*i)++;
-    return res;
+	if (!result)
+		return NULL;
+	while (input[*i])
+	{
+		if (input[*i] == '\'' || input[*i] == '\"')
+		{
+			quote = input[(*i)++];
+			while (input[*i] && input[*i] != quote)
+				result[j++] = input[(*i)++];
+			if (input[*i] == quote)
+				(*i)++;
+			else
+			{
+				ft_putstr_fd("minishell: syntax error: unclosed quote\n", STDERR_FILENO);
+				free(result);
+				return NULL;
+			}
+		}
+		else if (input[*i] == ' ' || ft_is_operator(input[*i]))
+			break;
+		else
+			result[j++] = input[(*i)++];
+	}
+	result[j] = '\0';
+	return result;
 }
 
 char	*read_operator(const char *str, int *i)

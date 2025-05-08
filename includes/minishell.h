@@ -94,12 +94,13 @@ t_env	*new_node(char **variable);
 //expander
 t_env	*find_env_var(t_env *env_list, const char *var_name);
 char	*strjoin_and_free(char *s1, char *s2);
-char	*expand_env_vars(char *input, int exit_status, t_env *env_list);
+char	*expand_env_vars(char *input, int exit_status, t_env *env_list, t_var *vat_list);
 char	*remove_quotes(char *input);
 bool	is_variable_assignment(char *str);
+char	*get_var_list(t_var	*var_list, const char	*var_name);
+char	*expand_input(char *input, int exit_status, t_env *env_list, t_var	*var_list);
 char	*expand_tilde(char *input);
 char	*get_env_value(t_env *env_list, const char *var_name);
-char	*expand_input(char *input, int exit_status, t_env *env_list);
 
 //tokens
 t_token		*ft_add_token(t_token **token_list, char *value, token_type type);

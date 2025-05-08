@@ -3,12 +3,13 @@
 #                                                         :::      ::::::::    #
 #    Makefile                                           :+:      :+:    :+:    #
 #                                                     +:+ +:+         +:+      #
-#    By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+         #
+#    By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
-#    Created: 2025/04/22 16:10:33 by mgamraou          #+#    #+#              #
-#    Updated: 2025/04/22 16:10:39 by mgamraou         ###   ########.fr        #
+#    Created: 2025/04/08 11:31:47 by mlabrirh          #+#    #+#              #
+#    Updated: 2025/04/08 11:33:34 by mlabrirh         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
+
 CC = cc
 CFLAGS = -Wall -Wextra -Werror
 LDFLAGS = -lreadline
@@ -30,7 +31,7 @@ $(LIBFT):
 	make -C $(LIBFT_DIR)
 
 %.o: %.c
-	$(CC) -c $< -o $@
+	$(CC) $(CFLAGS) -c $< -o $@
 
 $(NAME): $(OFILES)
 	$(CC) $(OFILES) $(LIBFT) $(LDFLAGS) -o $(NAME) 
