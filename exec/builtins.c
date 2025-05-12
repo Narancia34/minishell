@@ -12,11 +12,32 @@
 
 #include "../includes/minishell.h"
 
-int	ft_cd(char **arg)
+void	change_pwd_env(char *old_dir, char *current_dir, t_env **env_list)
+{
+	t_env *current = *env_list;
+	while (current)
+	{
+		if (ft_strcmp(current->var_name, "OLDPWD") == 0)
+		{
+			free(current->var_value);
+			current->var_value = ft_strdup(old_dir);
+		}
+		else if (ft_strcmp(current->var_name, "PWD") == 0)
+		{
+			free(current->var_value);
+			current->var_value = ft_strdup(current_dir);
+		}
+		current = current->next;
+	}
+}
+
+int	ft_cd(char **arg, t_env **env_list)
 {
 	char	current_dir[1024];
+	char	old_dir[1024];
 	char	*path;
 
+	getcwd(old_dir, sizeof(old_dir));
 	if (arg[1] == NULL)
 	{
 		path = getenv("HOME");
@@ -28,16 +49,17 @@ int	ft_cd(char **arg)
 	}
 	else
 		path = arg[1];
-	if (getcwd(current_dir, sizeof(current_dir)) == NULL)
-	{
-		perror("minishell: cd: getcwd error");
-		return 1;
-	}
 	if (chdir(path) != 0)
 	{
 		fprintf(stderr, "minishell: cd: %s: %s\n", path, strerror(errno));
 		return 1;
 	}
+	if (getcwd(current_dir, sizeof(current_dir)) == NULL)
+	{
+		perror("minishell: cd: getcwd error");
+		return 1;
+	}
+	change_pwd_env(old_dir, current_dir, env_list);
 	return 0;
 }
 
@@ -124,4 +146,52 @@ void	ft_unset(char **args, t_env **env_list)
 		remove_env_var(env_list, args[i]);
 		i++;
 	}
+}
+
+void	print_export(t_env	*env_list)
+{
+	(void)env_list;
+	return ;
+}
+
+void	add_to_env(t_env **env_list, char *arg)
+{
+	char	*var_name;
+	char	*var_value;
+	t_env	*new;
+	int		i;
+	int		j;
+
+	i = 0;
+	while (arg[i] != '=' && arg[i])
+		i++;
+	var_name = malloc(sizeof(char) * (i + 1));
+	var_value = ft_strdup(arg + i + 1);
+	j = 0;
+	while (arg[j] != '=' && arg[j])
+	{
+		var_name[j] = arg[j];
+		j++;
+	}
+	var_name[j] = '\0';
+	new = make_node(var_name, var_value);
+	add_to_list(env_list, new);
+}
+
+void	ft_export(char **args, t_env **env_list)
+{
+	int		i;
+
+	i = 1;
+	if (!args[i])
+		print_export(*env_list);
+	else
+	{
+		while (args[i])
+		{
+			add_to_env(env_list, args[i]);
+			i++;
+		}
+	}
+
 }

@@ -12,11 +12,11 @@
 
 #include "../includes/minishell.h"
 
-t_var	*make_node(char *var_name, char *var_value)
+t_env	*make_node(char *var_name, char *var_value)
 {
-	t_var	*node;
+	t_env	*node;
 
-	node = (t_var *)malloc(sizeof(t_var));
+	node = (t_env *)malloc(sizeof(t_env));
 	if (!node)
 		return (NULL);
 	node->var_name = ft_strdup(var_name);
@@ -37,43 +37,43 @@ t_var	*make_node(char *var_name, char *var_value)
 	return (node);
 }
 
-void	add_to_list(t_var **var_list, t_var *new)
+void	add_to_list(t_env **env_list, t_env *new_n)
 {
-	t_var	*current;
+	t_env	*current;
 
-	if (!*var_list)
+	if (!*env_list)
 	{
-		*var_list = new;
+		*env_list = new_n;
 		return;
 	}
-	current = *var_list;
+	current = *env_list;
 	while (current->next)
 		current = current->next;
-	current->next = new;
+	current->next = new_n;
 }
 
-void	handle_var(t_var **var_list, char *arg)
-{
-	char	*var_name;
-	char	*var_value;
-	t_var	*new;
-	int		len;
-	int		i;
-	int		j;
-
-	len = ft_strlen(arg);
-	i = 0;
-	while (arg[i] != '=')
-		i++;
-	var_name = malloc(sizeof(char) * i + 1);
-	var_value = ft_strdup(arg + i + 1);
-	j = 0;
-	while (arg[j] != '=')
-	{
-		var_name[j] = arg[j];
-		j++;
-	}
-	var_name[j] = '\0';
-	new = make_node(var_name, var_value);
-	add_to_list(var_list, new);
-}
+/*void	handle_var(t_var **var_list, char *arg)*/
+/*{*/
+/*	char	*var_name;*/
+/*	char	*var_value;*/
+/*	t_var	*new;*/
+/*	int		len;*/
+/*	int		i;*/
+/*	int		j;*/
+/**/
+/*	len = ft_strlen(arg);*/
+/*	i = 0;*/
+/*	while (arg[i] != '=')*/
+/*		i++;*/
+/*	var_name = malloc(sizeof(char) * i + 1);*/
+/*	var_value = ft_strdup(arg + i + 1);*/
+/*	j = 0;*/
+/*	while (arg[j] != '=')*/
+/*	{*/
+/*		var_name[j] = arg[j];*/
+/*		j++;*/
+/*	}*/
+/*	var_name[j] = '\0';*/
+/*	new = make_node(var_name, var_value);*/
+/*	add_to_list(var_list, new);*/
+/*}*/

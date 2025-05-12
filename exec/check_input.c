@@ -61,12 +61,13 @@ char	**get_cmd(char **o_args)
 	return (args);
 }
 
-void	check_input(t_command *input, t_env *env_list, char **envp, t_token *tokens, t_var **var_list)
+void	check_input(t_command *input, t_env **env_list, char **envp, t_token *tokens, t_var **var_list)
 {
 	t_command	*tmp;
 	t_token	*tmp_t;
 	char	**args;
 
+	(void)var_list;
 	if (has_pipe(input) > 1)
 		handle_pipeline(input, env_list, envp);
 	else
@@ -82,8 +83,8 @@ void	check_input(t_command *input, t_env *env_list, char **envp, t_token *tokens
 				tmp = tmp->next;
 				continue;
 			}
-			if (tmp_t->type == 6)
-				handle_var(var_list, tmp->args[0]);
+			/*if (tmp_t->type == 6)*/
+			/*	handle_var(var_list, tmp->args[0]);*/
 			else if (is_builtin(args[0]) == 1)
 				exec_builtin(args, env_list, tmp->args);
 			else

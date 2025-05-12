@@ -35,7 +35,7 @@ void	handle_pipe_util_b(int *prev_fd, int*fd)
 	(*prev_fd) = fd[0];
 }
 
-void	handle_pipeline(t_command  *input, t_env *env_list, char **envp)
+void	handle_pipeline(t_command  *input, t_env **env_list, char **envp)
 {
 	int		fd[2];
 	int		prev_fd;
