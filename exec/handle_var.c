@@ -34,6 +34,7 @@ t_env	*make_node(char *var_name, char *var_value)
 	else
 		node->var_value = NULL;
 	node->next = NULL;
+	node->prev = NULL;
 	return (node);
 }
 
@@ -50,6 +51,7 @@ void	add_to_list(t_env **env_list, t_env *new_n)
 	while (current->next)
 		current = current->next;
 	current->next = new_n;
+	new_n->prev = current;
 }
 
 /*void	handle_var(t_var **var_list, char *arg)*/
