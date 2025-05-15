@@ -142,6 +142,7 @@ void	handle_var(t_var **var_list, char *arg);
 void	add_to_list(t_env **env_list, t_env *new_n);
 t_env	*make_node(char *var_name, char *var_value);
 void	ft_export(char **args, t_env **env_list);
+int	lstlen(t_env *lst);
 
 
 #endif

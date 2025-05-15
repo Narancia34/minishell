@@ -150,8 +150,42 @@ void	ft_unset(char **args, t_env **env_list)
 
 void	print_export(t_env	*env_list)
 {
-	(void)env_list;
-	return ;
+	char	**res;
+	char	*tmp;
+	int		i;
+	int		j;
+	int		count;
+	int		min_index;
+
+	res = upd_env(env_list);
+	count = lstlen(env_list);
+	i = 0;
+	while (i < count - 1)
+	{
+		j = i + 1;
+		min_index = i;
+		while (j < count)
+		{
+			if (ft_strcmp(res[j], res[min_index]) < 0)
+				min_index = j;
+			j++;
+		}
+		if (min_index != i)
+		{
+			tmp = res[i];
+			res[i] = res[min_index];
+			res[min_index] = tmp;
+		}
+		i++;
+	}
+	i = 0;
+	while (i < count)
+	{
+		printf("declare -x %s\n", res[i]);
+		free(res[i]);
+		i++;
+	}
+	free(res);
 }
 
 void	add_to_env(t_env **env_list, char *arg)
@@ -161,6 +195,7 @@ void	add_to_env(t_env **env_list, char *arg)
 	t_env	*new;
 	int		i;
 	int		j;
+	t_env	*tmp;
 
 	i = 0;
 	while (arg[i] != '=' && arg[i])
@@ -174,6 +209,27 @@ void	add_to_env(t_env **env_list, char *arg)
 		j++;
 	}
 	var_name[j] = '\0';
+	tmp = *env_list;
+	while (tmp)
+	{
+		if (ft_strcmp(var_name, tmp->var_name) == 0)
+		{
+			if (ft_strcmp(var_value, tmp->var_value) == 0)
+			{
+				free(var_name);
+				free(var_value);
+				return ;
+			}
+			else
+		{
+				free(tmp->var_value);
+				free(var_name);
+				tmp->var_value = ft_strdup(var_value);
+				return ;
+			}
+		}
+		tmp = tmp->next;
+	}
 	new = make_node(var_name, var_value);
 	add_to_list(env_list, new);
 }
