@@ -36,7 +36,10 @@ char	**upd_env(t_env *env_list)
 	i = 0;
 	while (env_list)
 	{
-		tmp = ft_strjoin(env_list->var_name, "=");
+		if (env_list->flag == 1 && !env_list->var_value[0])
+			tmp = ft_strdup(env_list->var_name);
+		else
+			tmp = ft_strjoin(env_list->var_name, "=");
 		tmp = ft_strjoin(tmp, env_list->var_value);
 		u_env[i] = ft_strdup(tmp);
 		free(tmp);

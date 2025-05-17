@@ -12,7 +12,7 @@
 
 #include "../includes/minishell.h"
 
-t_env	*make_node(char *var_name, char *var_value)
+t_env	*make_node(char *var_name, char *var_value, int flag)
 {
 	t_env	*node;
 
@@ -33,6 +33,7 @@ t_env	*make_node(char *var_name, char *var_value)
 	}
 	else
 		node->var_value = NULL;
+	node->flag = flag;
 	node->next = NULL;
 	node->prev = NULL;
 	return (node);

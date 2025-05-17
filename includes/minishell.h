@@ -68,6 +68,7 @@ typedef struct s_env
 	char	*var_name;
 	char	*var_value;
 	int		exported;
+	int		flag;
 	struct s_env	*next;
 	struct s_env	*prev;
 } t_env;
@@ -140,7 +141,7 @@ char	**get_cmd(char **o_args);
 void	ft_unset(char **args, t_env **env_list);
 void	handle_var(t_var **var_list, char *arg);
 void	add_to_list(t_env **env_list, t_env *new_n);
-t_env	*make_node(char *var_name, char *var_value);
+t_env	*make_node(char *var_name, char *var_value, int flag);
 void	ft_export(char **args, t_env **env_list);
 int	lstlen(t_env *lst);
 

@@ -34,6 +34,7 @@ t_env	*new_node(char **variable)
 	else
 		node->var_value = NULL;
 	node->exported = 1;
+	node->flag = 0;
 	node->next = NULL;
 	node->prev = NULL;
 	return (node);
