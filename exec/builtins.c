@@ -100,14 +100,18 @@ void	ft_pwd()
 
 void	ft_env(t_env *env_list)
 {
-	t_env	*tmp;
+	int		i;
+	char	**res;
 
-	tmp = env_list;
-	while (tmp)
+	res = upd_env(env_list);
+	i = 0;
+	while (res[i])
 	{
-		printf("%s=%s\n", tmp->var_name, tmp->var_value);
-		tmp = tmp->next;
+		printf("%s\n", res[i]);
+		free(res[i]);
+		i++;
 	}
+	free(res);
 }
 
 void remove_env_var(t_env **env_list, char *var_name)
@@ -195,9 +199,11 @@ void	add_to_env(t_env **env_list, char *arg)
 	t_env	*new;
 	int		i;
 	int		j;
+	int		flag;
 	t_env	*tmp;
 
 	i = 0;
+	flag = 1;
 	while (arg[i] != '=' && arg[i])
 		i++;
 	var_name = malloc(sizeof(char) * (i + 1));
@@ -208,29 +214,33 @@ void	add_to_env(t_env **env_list, char *arg)
 		var_name[j] = arg[j];
 		j++;
 	}
+	if (arg[j] == '=')
+		flag = 0;
+	printf("\n%d\n", flag);
 	var_name[j] = '\0';
 	tmp = *env_list;
 	while (tmp)
 	{
 		if (ft_strcmp(var_name, tmp->var_name) == 0)
 		{
-			if (ft_strcmp(var_value, tmp->var_value) == 0)
-			{
-				free(var_name);
-				free(var_value);
+			if (flag == 1)
 				return ;
-			}
-			else
-		{
-				free(tmp->var_value);
-				free(var_name);
-				tmp->var_value = ft_strdup(var_value);
-				return ;
-			}
+		/*	if (ft_strcmp(var_value, tmp->var_value) == 0)*/
+		/*	{*/
+		/*		free(var_name);*/
+		/*		free(var_value);*/
+		/*		return ;*/
+		/*	}*/
+			tmp->flag = 0;
+			free(tmp->var_value);
+			free(var_name);
+			tmp->var_value = ft_strdup(var_value);
+			//tmp->var_value = ft_strjoin("=", var_value);
+			return ;
 		}
 		tmp = tmp->next;
 	}
-	new = make_node(var_name, var_value);
+	new = make_node(var_name, var_value, flag);
 	add_to_list(env_list, new);
 }
 
@@ -249,5 +259,4 @@ void	ft_export(char **args, t_env **env_list)
 			i++;
 		}
 	}
-
 }
