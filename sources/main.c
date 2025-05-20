@@ -6,7 +6,7 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 11:09:50 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/04/12 12:36:07 by mlabrirh         ###   ########.fr       */
+/*   Updated: 2025/05/19 17:47:43 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -37,39 +37,41 @@ void print_tokens(t_token *list)
 
 int main(int ac, char **av, char **env)
 {
-    (void)av;
-    (void)ac;
-    char *input;
-    char *expanded_input;
-    t_env    *env_list;
+	(void)av;
+	(void)ac;
+	char *input;
+	char *expanded_input;
+	t_env    *env_list;
 	char	**u_env;
-    t_var    *var_list;
+	t_var    *var_list;
+	struct	sigaction act;
 
-    env_list = init_env(env);
-    var_list = NULL;
-    while (1)
-    {
-        input = readline("minishell$ ");
-        if (!input)
-            break;
-        if (*input)
-            add_history(input);
-        
-        // Expand the input
-        expanded_input = expand_input(input, 0, env_list, var_list);
-        free(input); // Free the original input after expansion
-        if (!expanded_input)
-            continue; // Skip if expansion fails
-        // Tokenize the expanded input
-        t_token *tokens = tokenize(expanded_input);
-        free(expanded_input); // Free expanded input after tokenizing
-        if (!validate_syntax(tokens))
-        {
-            return 0;
-        }
-        t_command *commands = build_commands(tokens);
-        u_env = upd_env(env_list);
-        check_input(commands, &env_list, u_env, tokens, &var_list);
-    }
-    return 0;
+	env_list = init_env(env);
+	var_list = NULL;
+	/*handle_shlvl(&env_list);*/
+	while (1)
+	{
+		input = readline("minishell$ ");
+		if (!input)
+			break;
+		if (*input)
+			add_history(input);
+
+		// Expand the input
+		expanded_input = expand_input(input, 0, env_list, var_list);
+		free(input); // Free the original input after expansion
+		if (!expanded_input)
+			continue; // Skip if expansion fails
+		// Tokenize the expanded input
+		t_token *tokens = tokenize(expanded_input);
+		free(expanded_input); // Free expanded input after tokenizing
+		if (!validate_syntax(tokens))
+		{
+			return 0;
+		}
+		t_command *commands = build_commands(tokens);
+		u_env = upd_env(env_list);
+		check_input(commands, &env_list, u_env, tokens, &var_list);
+	}
+	return 0;
 }

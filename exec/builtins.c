@@ -225,17 +225,10 @@ void	add_to_env(t_env **env_list, char *arg)
 		{
 			if (flag == 1)
 				return ;
-		/*	if (ft_strcmp(var_value, tmp->var_value) == 0)*/
-		/*	{*/
-		/*		free(var_name);*/
-		/*		free(var_value);*/
-		/*		return ;*/
-		/*	}*/
 			tmp->flag = 0;
 			free(tmp->var_value);
 			free(var_name);
 			tmp->var_value = ft_strdup(var_value);
-			//tmp->var_value = ft_strjoin("=", var_value);
 			return ;
 		}
 		tmp = tmp->next;
