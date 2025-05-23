@@ -6,7 +6,7 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 11:09:50 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/05/19 17:47:43 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/05/21 10:50:48 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,16 +44,23 @@ int main(int ac, char **av, char **env)
 	t_env    *env_list;
 	char	**u_env;
 	t_var    *var_list;
-	struct	sigaction act;
 
 	env_list = init_env(env);
 	var_list = NULL;
-	/*handle_shlvl(&env_list);*/
+	handle_shlvl(&env_list);
+	setup_signals();
 	while (1)
 	{
+		g_signal_flag = 0;
 		input = readline("minishell$ ");
+		if (g_signal_flag == SIGINT)
+		{
+		}
 		if (!input)
+		{
+			write(STDOUT_FILENO, "exit\n", 5);
 			break;
+		}
 		if (*input)
 			add_history(input);
 

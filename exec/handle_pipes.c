@@ -40,6 +40,7 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp)
 	int		fd[2];
 	int		prev_fd;
 	pid_t	pid;
+	int		status;
 	t_command	*tmp;
 	char	**args;
 
