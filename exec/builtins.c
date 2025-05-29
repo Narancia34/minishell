@@ -63,10 +63,13 @@ int	ft_cd(char **arg, t_env **env_list)
 	return 0;
 }
 
-void	ft_echo(char **arg)
+int	ft_echo(char **arg)
 {
-	int	i = 1;
-	int	print_newline = 1;
+	int	i;
+	int	print_newline;
+
+	i = 1;
+	print_newline = 1;
 	while (arg[i] && arg[i][0] == '-' && arg[i][1] == 'n')
 	{
 		int	j = 2;
@@ -88,22 +91,27 @@ void	ft_echo(char **arg)
 	}
 	if (print_newline)
 		printf("\n");
+	return (0);
 }
 
-void	ft_pwd()
+int	ft_pwd()
 {
 	char	current_dir[1024];
 
-	getcwd(current_dir, sizeof(current_dir));
+	if (getcwd(current_dir, sizeof(current_dir)) == NULL)
+		return (1);
 	printf("%s\n", current_dir);
+	return (0);
 }
 
-void	ft_env(t_env *env_list)
+int	ft_env(t_env *env_list)
 {
 	int		i;
 	char	**res;
 
 	res = upd_env(env_list);
+	if (!res || !res[0])
+		return (1);
 	i = 0;
 	while (res[i])
 	{
@@ -112,6 +120,7 @@ void	ft_env(t_env *env_list)
 		i++;
 	}
 	free(res);
+	return (0);
 }
 
 void remove_env_var(t_env **env_list, char *var_name)
@@ -137,22 +146,22 @@ void remove_env_var(t_env **env_list, char *var_name)
 	}
 }
 
-void	ft_unset(char **args, t_env **env_list)
+int	ft_unset(char **args, t_env **env_list)
 {
 	int	i;
 
 	if (!args || !args[0] || !env_list || !*env_list)
-		return;
-
+		return (1);
 	i = 1;
 	while (args[i])
 	{
 		remove_env_var(env_list, args[i]);
 		i++;
 	}
+	return (0);
 }
 
-void	print_export(t_env	*env_list)
+int	print_export(t_env	*env_list)
 {
 	char	**res;
 	char	*tmp;
@@ -162,6 +171,8 @@ void	print_export(t_env	*env_list)
 	int		min_index;
 
 	res = upd_env(env_list);
+	if (!res)
+		return (1);
 	count = lstlen(env_list);
 	i = 0;
 	while (i < count - 1)
@@ -190,9 +201,10 @@ void	print_export(t_env	*env_list)
 		i++;
 	}
 	free(res);
+	return (0);
 }
 
-void	add_to_env(t_env **env_list, char *arg)
+int	add_to_env(t_env **env_list, char *arg)
 {
 	char	*var_name;
 	char	*var_value;
@@ -216,40 +228,60 @@ void	add_to_env(t_env **env_list, char *arg)
 	}
 	if (arg[j] == '=')
 		flag = 0;
-	printf("\n%d\n", flag);
 	var_name[j] = '\0';
+	if (!ft_isalpha(var_name[0]) && var_name[0] != '_')
+	{
+		free(var_name);
+		free(var_value);
+		return (1);
+	}
+	i = 1;
+	while (var_name[i])
+	{
+		if (!ft_isalnum(var_name[i]) && var_name[i] != '_')
+		{
+			free(var_name);
+			free(var_value);
+			return (1);
+		}
+		i++;
+	}
 	tmp = *env_list;
 	while (tmp)
 	{
 		if (ft_strcmp(var_name, tmp->var_name) == 0)
 		{
 			if (flag == 1)
-				return ;
+				return (0);
 			tmp->flag = 0;
 			free(tmp->var_value);
 			free(var_name);
 			tmp->var_value = ft_strdup(var_value);
-			return ;
+			return (0);
 		}
 		tmp = tmp->next;
 	}
 	new = make_node(var_name, var_value, flag);
 	add_to_list(env_list, new);
+	return (0);
 }
 
-void	ft_export(char **args, t_env **env_list)
+int	ft_export(char **args, t_env **env_list)
 {
-	int		i;
+	int	i;
+	int	ret;
 
+	ret = 0;
 	i = 1;
 	if (!args[i])
-		print_export(*env_list);
+		ret = print_export(*env_list);
 	else
 	{
 		while (args[i])
 		{
-			add_to_env(env_list, args[i]);
+			ret = add_to_env(env_list, args[i]);
 			i++;
 		}
 	}
+	return (ret);
 }

@@ -30,11 +30,10 @@ void	handle_exec(char *path, char **args, char **envp)
 	}
 }
 
-void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe)
+void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s)
 {
 	pid_t	pid;
 	int		status;
-	int		exit_s;
 	char	*cmd_path;
 
 	if (has_pipe == 0)
@@ -57,14 +56,24 @@ void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe)
 	{
 			waitpid(pid, &status, 0);
 			if (WIFEXITED(status))
-				exit_s = WEXITSTATUS(status);
+				*exit_s = WEXITSTATUS(status);
 			else if (WIFSIGNALED(status))
-				g_signal_flag = WTERMSIG(status);
+			{
+			g_signal_flag = WTERMSIG(status);
+			if (g_signal_flag == 2)
+			{
+				*exit_s = 130;
+				g_signal_flag = 0;
+				printf("\n");
+			}
+			else if (g_signal_flag == 3)
+			{
+				*exit_s = 131;
+				g_signal_flag = 0;
+				printf("Quit (core dumped)\n");
+			}
+		}
 			setup_signals();
-			if (!exit_s)
-				printf("exit status:%d\n", exit_s);
-			else
-				printf("signal passed:%d\n", g_signal_flag);
 		}
 	}
 	else

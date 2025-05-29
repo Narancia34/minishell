@@ -29,7 +29,7 @@ int	is_builtin(char *arg)
 	return (0);
 }
 
-void	exec_builtin(char **arg, t_env **env_list, char **o_args)
+void	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s)
 {
 	if (!arg || !arg[0])
 		return ;
@@ -43,19 +43,21 @@ void	exec_builtin(char **arg, t_env **env_list, char **o_args)
 		return;
 	}
 	if (ft_strcmp(arg[0], "echo") == 0)
-		ft_echo(arg);
+		*exit_s = ft_echo(arg);
 	if (ft_strcmp(arg[0], "cd") == 0)
-		ft_cd(arg, env_list);
+		*exit_s = ft_cd(arg, env_list);
 	if (ft_strcmp(arg[0], "pwd") == 0)
-		ft_pwd();
+		*exit_s = ft_pwd();
 	if (ft_strcmp("env", arg[0]) == 0)
-		ft_env(*env_list);
+		*exit_s = ft_env(*env_list);
 	if (ft_strcmp("exit", arg[0]) == 0)
 		exit(0);
 	if (ft_strcmp(arg[0], "unset") == 0)
-		ft_unset(arg, env_list);
+		*exit_s = ft_unset(arg, env_list);
 	if (ft_strcmp(arg[0], "export") == 0)
-		ft_export(arg, env_list);
+		*exit_s = ft_export(arg, env_list);
+	clean_up(NULL, arg);
+	clean_up(NULL, o_args);
 	dup2(saved_stdout, STDOUT_FILENO);
 	dup2(saved_stdin, STDIN_FILENO);
 	close(saved_stdout);

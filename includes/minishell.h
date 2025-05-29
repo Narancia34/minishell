@@ -6,7 +6,7 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 13:49:55 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/05/21 10:52:22 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/05/23 16:42:54 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,6 +89,12 @@ typedef struct s_shell
 	t_var	*var_list;
 } t_shell;
 
+typedef struct s_pid
+{
+	pid_t	pid;
+	struct s_pid	*next;
+} t_pid;
+
 void check_and_set_assignment(t_token *token);
 // init env in a stack
 t_env	*init_env(char	**env);
@@ -128,28 +134,30 @@ void	print_tokens(t_token *list);      // Optional for debug
 
 //execution part
 char	*find_cmd_path(char *full_cmd, char **envp);
-void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe);
-void	check_input(t_command *input, t_env **env_list, char **envp, t_token *token, t_var **var_list);
-void	exec_builtin(char **arg, t_env **env_list, char **o_args);
+void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s);
+void	check_input(t_command *input, t_env **env_list, char **envp, t_token *token, t_var **var_list, int *exit_s);
+void	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s);
 int	is_builtin(char *arg);
 void	clean_up(char *str, char **strs);
 int	ft_cd(char **arg, t_env **env_list);
-void	ft_echo(char **arg);
-void	ft_pwd();
-void	ft_env(t_env *env_list);
+int	ft_echo(char **arg);
+int	ft_pwd();
+int	ft_env(t_env *env_list);
 int	redirect_in(char **args);
 char	**upd_env(t_env *env_list);
-void	handle_pipeline(t_command *input, t_env **env_list, char **envp);
+void	handle_pipeline(t_command *input, t_env **env_list, char **envp, int *exit_s);
 char	**get_cmd(char **o_args);
-void	ft_unset(char **args, t_env **env_list);
+int	ft_unset(char **args, t_env **env_list);
 void	handle_var(t_var **var_list, char *arg);
 void	add_to_list(t_env **env_list, t_env *new_n);
 t_env	*make_node(char *var_name, char *var_value, int flag);
-void	ft_export(char **args, t_env **env_list);
+int	ft_export(char **args, t_env **env_list);
 int	lstlen(t_env *lst);
 void	handle_shlvl(t_env **env_list);
 void	setup_signals();
 void	ignore_signals();
+t_pid	*make_pid_node(pid_t pid);
+void	add_pid_node(t_pid **pid_list, t_pid *new_n);
 
 
 #endif
