@@ -28,6 +28,7 @@ void	handle_shlvl(t_env **env_list)
 			shlvl++;
 			tmp = ft_itoa(shlvl);
 			current->var_value = ft_strdup(tmp);
+			free(tmp);
 		}
 		current = current->next;
 	}

@@ -29,18 +29,18 @@ int	is_builtin(char *arg)
 	return (0);
 }
 
-void	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s)
+int	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s)
 {
 	if (!arg || !arg[0])
-		return ;
+		return (0);
 	int saved_stdout = dup(STDOUT_FILENO);
 	int saved_stdin = dup(STDIN_FILENO);
-	if (redirect_in(o_args) != 0) {
+	if (redirect_in(o_args) == 1) {
 		ft_putstr_fd("minishell: redirection error\n", 2);
 		dup2(saved_stdout, STDOUT_FILENO);  // Restore stdout
 		close(saved_stdout);
 		close(saved_stdin);
-		return;
+		return (0);
 	}
 	if (ft_strcmp(arg[0], "echo") == 0)
 		*exit_s = ft_echo(arg);
@@ -51,15 +51,14 @@ void	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s)
 	if (ft_strcmp("env", arg[0]) == 0)
 		*exit_s = ft_env(*env_list);
 	if (ft_strcmp("exit", arg[0]) == 0)
-		exit(0);
+		return (1);
 	if (ft_strcmp(arg[0], "unset") == 0)
 		*exit_s = ft_unset(arg, env_list);
 	if (ft_strcmp(arg[0], "export") == 0)
 		*exit_s = ft_export(arg, env_list);
-	clean_up(NULL, arg);
-	clean_up(NULL, o_args);
 	dup2(saved_stdout, STDOUT_FILENO);
 	dup2(saved_stdin, STDIN_FILENO);
 	close(saved_stdout);
 	close(saved_stdin);
+	return (0);
 }

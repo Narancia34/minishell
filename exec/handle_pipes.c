@@ -74,7 +74,7 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 			if (is_builtin(args[0]) == 1)
 				exec_builtin(args, env_list, tmp->args, exit_s);
 			else
-				exec_cmd(args, envp, tmp->args, 1, exit_s);
+				exec_cmd(args, envp, tmp->args, 1, exit_s, env_list);
 			exit(*exit_s);
 		}
 		else
