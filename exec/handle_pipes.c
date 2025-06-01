@@ -46,6 +46,7 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 	char	**args;
 	t_pid	*pid_list;
 	t_pid	*tmp_n;
+	t_pid	*to_free;
 
 	prev_fd = -1;
 	tmp = input;
@@ -74,13 +75,12 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 			if (is_builtin(args[0]) == 1)
 				exec_builtin(args, env_list, tmp->args, exit_s);
 			else
-				exec_cmd(args, envp, tmp->args, 1, exit_s, env_list);
+				exec_cmd(args, envp, tmp->args, 1, exit_s, env_list, input);
 			exit(*exit_s);
 		}
 		else
 			handle_pipe_util_b(&prev_fd, fd);
 		tmp_n = make_pid_node(pid);
-		(void)tmp_n;
 		add_pid_node(&pid_list, tmp_n);
 		tmp = tmp->next;
 	}
@@ -88,7 +88,9 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 	while (tmp_n)
 	{
 		waitpid(tmp_n->pid, &status, 0);
+		to_free = tmp_n;
 		tmp_n = tmp_n->next;
+		free(to_free);
 	}
 	if (WIFEXITED(status))
 		*exit_s = WEXITSTATUS(status);

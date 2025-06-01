@@ -11,63 +11,74 @@
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
-#include <stdlib.h>
 
-static bool ft_have_a_quote(const char *input, int *i)
+char *read_quoted(const char *input, int *i)
 {
-	int j = (*i);
-	while(input[j])
-	{
-		if (input[j] == '\'' || input[j] == '\"')
-			return true;
-		else if (input[j] == ' ')
-			return false;
-		j++;
-	}
-	return false;
+    char    quote;
+    int     start;
+    char    *content;
+
+    quote = input[*i];
+    start = ++(*i);
+    while (input[*i] && input[*i] != quote)
+        (*i)++;
+    if (input[*i] != quote)
+    {
+        ft_putstr_fd("minishell: syntax error: unclosed quote\n", STDERR_FILENO);
+        return NULL;
+    }
+    content = strndup(&input[start], *i - start);
+    (*i)++;
+    return content;
 }
 
-static	void	tokenize_next(const char *input, int *i, t_token **token_list)
+static int tokenize_next(const char *input, int *i, t_token **token_list)
 {
-	char			*content;
-	token_type		type;
+    char *content = NULL;
+    token_type type;
 
-	if (ft_have_a_quote(input, i))
+    if (ft_is_operator(input[*i]))
     {
-        content = read_quoted((char *)input, i);
+        content = read_operator(input, i);
         if (!content)
-            return;
-        ft_add_token(token_list, content, TOKEN_WORD);
+            return -1;
+        type = get_operation_type(content);
+        if (!ft_add_token(token_list, content, type)) {
+            free(content);
+            return -1;
+        }
         free(content);
     }
-	else if (ft_is_operator(input[*i]))
-	{
-		content = read_operator(input, i);
-		type = get_operation_type(content);
-		ft_add_token(token_list, content, type);
-	}
-	else
-	{
-		content = read_word(input, i);
-		ft_add_token(token_list, content, TOKEN_WORD);
-		free(content);
-	}
+    else
+    {
+        content = read_word(input, i);
+        if (!content)
+            return -1;
+        if (!ft_add_token(token_list, content, TOKEN_WORD)) {
+            free(content);
+            return -1;
+        }
+        free(content);
+    }
+    return 0;
 }
 
-t_token	*tokenize(const char *input)
+t_token *tokenize(const char *input)
 {
-	t_token	*token_list;
-	int		i;
+    t_token *token_list = NULL;
+    int i = 0;
 
-	token_list = NULL;
-	i = 0;
-	while (input[i])
-	{
-		while (input[i] && ft_whitespace(input[i]))
-			i++;
-		if (!input[i])
-			break ;
-		tokenize_next(input, &i, &token_list);
-	}
-	return (token_list);
+    while (input[i])
+    {
+        while (input[i] && ft_whitespace(input[i]))
+            i++;
+        if (!input[i])
+            break;
+        if (tokenize_next(input, &i, &token_list) < 0)
+        {
+            free_tokens(token_list);
+            return NULL;
+        }
+    }
+    return token_list;
 }

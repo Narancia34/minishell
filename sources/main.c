@@ -6,12 +6,40 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 11:09:50 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/05/21 10:50:48 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/04/12 12:36:07 by mlabrirh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-#include <stdio.h>
+
+void	free_tokens(t_token *head)
+{
+	t_token *tmp;
+
+	while (head)
+	{
+		tmp = head->next;
+		if (head->value)
+			free(head->value);
+		free(head);
+		head = tmp;
+	}
+}
+
+void free_commands(t_command *cmd) {
+    t_command *tmp;
+    int i;
+    while (cmd) {
+        tmp = cmd->next;
+        if (cmd->args) {
+            for (i = 0; cmd->args[i]; i++)
+                free(cmd->args[i]);
+            free(cmd->args);
+        }
+        free(cmd);
+        cmd = tmp;
+    }
+}
 
 void print_commands(t_command *cmd)
 {
@@ -43,17 +71,17 @@ int main(int ac, char **av, char **env)
 	char *expanded_input;
 	t_env    *env_list;
 	char	**u_env;
-	t_var    *var_list;
 	int		exit_s;
+	t_token *tokens;
+	t_command *commands;
 
 	exit_s = 0;
 	env_list = init_env(env);
-	var_list = NULL;
 	handle_shlvl(&env_list);
 	setup_signals();
 	while (1)
 	{
-		g_signal_flag = 0;
+		/*g_signal_flag = 0;*/
 		input = readline("minishell$ ");
 		if (g_signal_flag == SIGINT)
 		{
@@ -65,28 +93,34 @@ int main(int ac, char **av, char **env)
 		}
 		if (*input)
 			add_history(input);
-
-		// Expand the input
-		expanded_input = expand_input(input, 0, env_list, var_list);
-		free(input); // Free the original input after expansion
+		expanded_input = expand_input(input, exit_s, env_list);
+		free(input);
 		if (!expanded_input)
-			continue; // Skip if expansion fails
-		// Tokenize the expanded input
-		t_token *tokens = tokenize(expanded_input);
-		free(expanded_input); // Free expanded input after tokenizing
+			continue;
+		tokens = tokenize(expanded_input);
+		free(expanded_input);
+		if (!tokens)
+			continue;
 		if (!validate_syntax(tokens))
 		{
-			return 0;
+			free_tokens(tokens);
+			continue;
 		}
-		t_command *commands = build_commands(tokens);
+		commands = build_commands(tokens);
+		if (!commands) {
+			free_tokens(tokens);
+			continue;
+		}
+		free_tokens(tokens);
 		u_env = upd_env(env_list);
-		if (check_input(commands, &env_list, u_env, tokens, &var_list, &exit_s) == 1)
+		if (check_input(commands, &env_list, u_env, &exit_s) == 1)
 		{
+			free_commands(commands);
 			clean_up(NULL, u_env);
-			break ;
+			break;
 		}
+		free_commands(commands);
 		clean_up(NULL, u_env);
-		printf("%d\n", exit_s);
 	}
 	t_env	*env_to_free;
 	while (env_list)

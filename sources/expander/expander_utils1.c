@@ -12,7 +12,7 @@
 
 #include "../../includes/minishell.h"
 
-static bool is_valid_var_char(char c, bool first_char)
+bool is_valid_var_char(char c, bool first_char)
 {
 	if (first_char)
 		return (isalpha(c) || c == '_');
@@ -29,12 +29,11 @@ static	void	handle_exit_status(int exit_status, char **result, const char **star
 	*start += 2;
 }
 
-static	void	handle_env_var(t_env *env_list, char **result, const char **start, t_var *var_list)
+void	handle_env_var(t_env *env_list, char **result, const char **start)
 {
 	const char	*var_start;
 	char		*var_name;
 	char		*var_value;
-	char		*value_var;
 
 	var_start = ++(*start);
 	while (is_valid_var_char(**start, *start == var_start))
@@ -43,16 +42,10 @@ static	void	handle_env_var(t_env *env_list, char **result, const char **start, t
 	var_value = get_env_value(env_list, var_name);
 	if (var_value)
 		*result = strjoin_and_free(*result, var_value);
-	else
-	{
-		value_var = get_var_list(var_list, var_name);
-		if (value_var)
-			*result = strjoin_and_free(*result, value_var);
-	}
 	free(var_name);
 }
 
-static char	*append_character_as_is(const char **start, char *result)
+char	*append_character_as_is(const char **start, char *result)
 {
 	char	temp[2];
 
@@ -63,7 +56,7 @@ static char	*append_character_as_is(const char **start, char *result)
 	return result;
 }
 
-char	*expand_env_vars(char *input, int exit_status, t_env *env_list, t_var *var_list)
+char	*expand_env_vars(char *input, int exit_status, t_env *env_list)
 {
 	char		*result = NULL;
 	const char	*start;
@@ -80,7 +73,6 @@ char	*expand_env_vars(char *input, int exit_status, t_env *env_list, t_var *var_
 				quote = '\0'; // End the quote
 			else
 				quote = *start; // Start the quote
-
 			temp[0] = *start;
 			temp[1] = '\0';
 			result = strjoin_and_free(result, temp);
@@ -91,7 +83,7 @@ char	*expand_env_vars(char *input, int exit_status, t_env *env_list, t_var *var_
 			if (*(start + 1) == '?')
 				handle_exit_status(exit_status, &result, &start);
 			else 
-				handle_env_var(env_list, &result, &start, var_list);
+				handle_env_var(env_list, &result, &start);
 		}
 		else
 			result = append_character_as_is(&start, result);

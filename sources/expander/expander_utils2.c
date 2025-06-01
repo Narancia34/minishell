@@ -11,7 +11,6 @@
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
-#include <string.h>
 
 char	*get_env_value(t_env *env_list, const char *var_name)
 {
@@ -32,7 +31,7 @@ char	*get_var_list(t_var	*var_list, const char	*var_name)
 			return (var_list->var_value);
 		var_list = var_list->next;
 	}
-	return NULL;
+	return (NULL);
 }
 
 char	*strjoin_and_free(char *s1, char *s2)
@@ -47,45 +46,6 @@ char	*strjoin_and_free(char *s1, char *s2)
 		return (s1);
 	result = ft_strjoin(s1, s2);
 	free(s1);
-	return (result);
-}
-
-static char	*append_unquoted(const char *input, char *result)
-{
-	int		i;
-	char	quote;
-	char	temp[2];
-
-	i = 0;
-	quote = '\0';
-	while (input[i])
-	{
-		if ((input[i] == '\'' || input[i] == '"') && !quote)
-			quote = input[i++];
-		else if (input[i] == quote)
-		{
-			quote = '\0';
-			i++;
-		}
-		else
-		{
-			temp[0] = input[i++];
-			temp[1] = '\0';
-			result = strjoin_and_free(result, temp);
-		}
-	}
-	return (result);
-}
-
-char	*remove_quotes(char *input)
-{
-	char	*result;
-
-	result = ft_strdup("");
-	if (!result)
-		return (NULL);
-	result = append_unquoted(input, result);
-	free(input);
 	return (result);
 }
 

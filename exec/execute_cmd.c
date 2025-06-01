@@ -14,11 +14,12 @@
 #include <fcntl.h>
 #include <stdlib.h>
 
-void	handle_exec(char *path, char **args, char **envp, t_env **env_list)
+void	handle_exec(char *path, char **args, char **envp, t_env **env_list, t_command *input)
 {
 	if (!path)
 	{
 		ft_putstr_fd("command not found\n", 2);
+		free_commands(input);
 		clean_up(path, args);
 		clean_up(NULL, envp);
 		t_env *tmp;
@@ -35,12 +36,13 @@ void	handle_exec(char *path, char **args, char **envp, t_env **env_list)
 	if (execve(path, args, envp) == -1)
 	{
 		perror("failed to execute command");
+		free_commands(input);
 		clean_up(path, args);
 		exit(126);
 	}
 }
 
-void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s, t_env **env_list)
+void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s, t_env **env_list, t_command *input)
 {
 	pid_t	pid;
 	int		status;
@@ -60,7 +62,7 @@ void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s
 				exit(EXIT_FAILURE);
 			}
 			cmd_path = find_cmd_path(args[0], envp);
-			handle_exec(cmd_path, args, envp, env_list);
+			handle_exec(cmd_path, args, envp, env_list, input);
 		}
 		else
 	{
@@ -94,6 +96,6 @@ void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s
 			exit(EXIT_FAILURE);
 		}
 		cmd_path = find_cmd_path(args[0], envp);
-		handle_exec(cmd_path, args, envp, env_list);
+		handle_exec(cmd_path, args, envp, env_list, input);
 	}
 }

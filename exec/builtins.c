@@ -36,16 +36,24 @@ int	ft_cd(char **arg, t_env **env_list)
 	char	current_dir[1024];
 	char	old_dir[1024];
 	char	*path;
+	t_env	*tmp;
 
 	getcwd(old_dir, sizeof(old_dir));
 	if (arg[1] == NULL)
 	{
-		path = getenv("HOME");
+		tmp = *env_list;
+		while (tmp)
+		{
+			if (ft_strcmp("HOME", tmp->var_name) == 0)
+				path = ft_strdup(tmp->var_value);
+			tmp = tmp->next;
+		}
 		if (path == NULL)
 		{
-			fprintf(stderr, "minishell: cd: HOME not set\n");
+			printf("minishell: cd: HOME not set\n");
 			return 1;
 		}
+		free (path);
 	}
 	else
 		path = arg[1];

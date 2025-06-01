@@ -13,7 +13,7 @@
 
 #include "../../includes/minishell.h"
 
-char	*expand_input(char *input, int exit_status, t_env *env_list, t_var	*var_list)
+char	*expand_input(char *input, int exit_status, t_env *env_list)
 {
 	char	*expanded_tilde;
 	char	*expanded_vars;
@@ -21,6 +21,7 @@ char	*expand_input(char *input, int exit_status, t_env *env_list, t_var	*var_lis
 	if (!input)
 		return (NULL);
 	expanded_tilde = expand_tilde(input);
-	expanded_vars = expand_env_vars(expanded_tilde, exit_status, env_list, var_list);
+	expanded_vars =	expand_env_vars(expanded_tilde, exit_status, env_list);
+	free(expanded_tilde);
 	return (expanded_vars);
 }

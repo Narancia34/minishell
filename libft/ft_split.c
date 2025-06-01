@@ -3,32 +3,29 @@
 /*                                                        :::      ::::::::   */
 /*   ft_split.c                                         :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
+/*   By: mgamraou <mgamraou@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2024/11/10 22:12:58 by mlabrirh          #+#    #+#             */
-/*   Updated: 2024/11/15 17:54:29 by mlabrirh         ###   ########.fr       */
+/*   Created: 2024/10/25 11:11:10 by mgamraou          #+#    #+#             */
+/*   Updated: 2025/01/31 13:48:24 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "libft.h"
 
-static	int	count_words(const char *str, char c)
+static int	count_words(const char *str, char c)
 {
 	int	i;
 	int	count;
 
 	count = 0;
 	i = 0;
-	if (str[i] != c && str[i] != '\0' )
-	{
+	if (str[i] != c && str[i] != '\0')
 		count++;
-	}
+	i = 1;
 	while (str[i])
 	{
 		if (str[i - 1] == c && str[i] != c)
-		{
 			count++;
-		}
 		i++;
 	}
 	return (count);

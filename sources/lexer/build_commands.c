@@ -12,64 +12,70 @@
 
 #include "../../includes/minishell.h"
 
-void check_and_set_assignment(t_token *token)
+static void	free_single_command(t_command *cmd)
 {
-	char	*equal_sign;
+	if (!cmd) return;
+	if (cmd->args) {
+		for (int i = 0; cmd->args[i]; i++)
+			free(cmd->args[i]);
+		free(cmd->args);
+	}
+	free(cmd);
+}
 
-    while (token)
-    {
-        if (token->type == TOKEN_WORD)
-        {
-            equal_sign = strchr(token->value, '=');
-            if (equal_sign && equal_sign != token->value)
-            {
-                token->type = TOKEN_ASSIGNMENT;
-            }
-        }
-        token = token->next;
-    }
+void	free_cmd(t_command *cmd)
+{
+	t_command *tmp;
+	while (cmd) {
+		tmp = cmd->next;
+		free_single_command(cmd);
+		cmd = tmp;
+	}
 }
 
 static t_command *create_command(t_token **tokens)
 {
-    t_command *cmd;
-
-    cmd = malloc(sizeof(t_command));
+    t_command *cmd = malloc(sizeof(t_command));
     if (!cmd)
-        return (NULL);
+        return NULL;
     cmd->args = NULL;
     cmd->arg_size = 0;
     cmd->type = TOKEN_WORD;
     cmd->next = NULL;
     while (*tokens && (*tokens)->type != TOKEN_PIPE)
     {
-        cmd->args = ft_realloc((*tokens)->value, cmd->args);
-        if (!cmd->args)
-            return (free(cmd), NULL);
-        if ((*tokens)->type == TOKEN_WORD)
-            check_and_set_assignment(*tokens);
+        char *arg_dup = ft_strdup((*tokens)->value);
+        if (!arg_dup) {
+            free_single_command(cmd);
+            return NULL;
+        }
+        char **tmp_args = ft_realloc(arg_dup, cmd->args);
+        if (!tmp_args) {
+            free(arg_dup);
+            free_single_command(cmd);
+            return NULL;
+        }
+        cmd->args = tmp_args;
         *tokens = (*tokens)->next;
     }
-
     if (*tokens && (*tokens)->type == TOKEN_PIPE)
         *tokens = (*tokens)->next;
-
     return cmd;
 }
 
 t_command	*build_commands(t_token *tokens)
 {
-	t_command	*head;
-	t_command	*current;
+	t_command	*head = NULL;
+	t_command	*current = NULL;
 	t_command	*cmd;
 
-	head = NULL;
-	current = NULL;
 	while (tokens)
 	{
 		cmd = create_command(&tokens);
-		if (!cmd)
-			break ;
+		if (!cmd) {
+			free_cmd(head);
+			return NULL;
+		}
 		if (!head)
 			head = cmd;
 		else
@@ -78,5 +84,5 @@ t_command	*build_commands(t_token *tokens)
 	}
 	set_size(head);
 	set_type(head);
-	return (head);
+	return head;
 }
