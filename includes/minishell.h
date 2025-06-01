@@ -147,7 +147,7 @@ int	ft_cd(char **arg, t_env **env_list);
 int	ft_echo(char **arg);
 int	ft_pwd();
 int	ft_env(t_env *env_list);
-int	redirect_in(char **args);
+int	redirect_in(char **args, t_env *env_list);
 char	**upd_env(t_env *env_list);
 void	handle_pipeline(t_command *input, t_env **env_list, char **envp, int *exit_s);
 char	**get_cmd(char **o_args);
@@ -163,6 +163,7 @@ void	ignore_signals();
 t_pid	*make_pid_node(pid_t pid);
 void	add_pid_node(t_pid **pid_list, t_pid *new_n);
 void free_commands(t_command *cmd);
+char	*expander_heredoc(char	*input, t_env *env_list);
 
 
 #endif

@@ -56,7 +56,7 @@ void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s
 		{
 			signal(SIGINT, SIG_DFL);
 			signal(SIGQUIT, SIG_DFL);
-			if (redirect_in(o_args) == 1)
+			if (redirect_in(o_args, *env_list) == 1)
 			{
 				clean_up(NULL, args);
 				exit(EXIT_FAILURE);
@@ -90,7 +90,7 @@ void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s
 	}
 	else
 {
-		 if (redirect_in(o_args) == 1)
+		 if (redirect_in(o_args, *env_list) == 1)
 		{
 			clean_up(NULL, args);
 			exit(EXIT_FAILURE);

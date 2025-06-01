@@ -14,7 +14,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 
-int	ft_here_doc(char *delimiter)
+int	ft_here_doc(char *delimiter, t_env *env_list)
 {
 	char	*line;
 	char	*res;
@@ -40,7 +40,7 @@ int	ft_here_doc(char *delimiter)
 		printf("didnt open\n");
 		return 1;
 }
-	ft_putstr_fd(res, fd);
+	ft_putstr_fd(expander_heredoc(res, env_list), fd);
 	free(res);
 	close(fd);
 	fd = open("test", O_RDONLY, 0644);
@@ -49,7 +49,7 @@ int	ft_here_doc(char *delimiter)
 	unlink("test");
 	return (0);
 }
-int	redirect_in(char **args)
+int	redirect_in(char **args, t_env *env_list)
 {
 	int	fd_in;
 	int	fd_out;
@@ -95,7 +95,7 @@ int	redirect_in(char **args)
 		{
 			dup2(out, STDOUT_FILENO);
 			dup2(in, STDIN_FILENO);
-			ft_here_doc(args[i + 1]);
+			ft_here_doc(args[i + 1], env_list);
 			i+=2;
 		}
 		else
