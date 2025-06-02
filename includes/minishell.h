@@ -139,6 +139,7 @@ void	print_tokens(t_token *list);      // Optional for debug
 //execution part
 char	*find_cmd_path(char *full_cmd, char **envp);
 void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s, t_env **env_list, t_command *input);
+void	exec_piped_cmd(char **args, char **envp, char **o_args, t_env **env_list, t_command *input, t_pid *pid_list);
 int	check_input(t_command *input, t_env **env_list, char **envp, int *exit_s);
 int	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s);
 int	is_builtin(char *arg);

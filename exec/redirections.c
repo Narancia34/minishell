@@ -21,9 +21,15 @@ int	ft_here_doc(char *delimiter, t_env *env_list)
 	char	*tmp;
 	int		fd;
 	res = ft_strdup("");
+	setup_signals();
 	while (1)
 	{
 		line = readline(">");
+		if (!line)
+		{
+			ft_putstr_fd("warning: here-document delimited by end-of-file\n" , 2);
+			break ;
+		}
 		if (ft_strcmp(line, delimiter) == 0)
 			break;
 		tmp = line;

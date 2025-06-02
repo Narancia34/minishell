@@ -39,29 +39,35 @@ int	ft_cd(char **arg, t_env **env_list)
 	t_env	*tmp;
 
 	getcwd(old_dir, sizeof(old_dir));
+	path = ft_strdup("");
 	if (arg[1] == NULL)
 	{
 		tmp = *env_list;
 		while (tmp)
 		{
 			if (ft_strcmp("HOME", tmp->var_name) == 0)
+			{
 				path = ft_strdup(tmp->var_value);
+				break ;
+			}
 			tmp = tmp->next;
 		}
-		if (path == NULL)
+		if (!path[0])
 		{
 			printf("minishell: cd: HOME not set\n");
+			free(path);
 			return 1;
 		}
-		free (path);
 	}
 	else
 		path = arg[1];
 	if (chdir(path) != 0)
 	{
 		fprintf(stderr, "minishell: cd: %s: %s\n", path, strerror(errno));
+		free(path);
 		return 1;
 	}
+	free(path);
 	if (getcwd(current_dir, sizeof(current_dir)) == NULL)
 	{
 		perror("minishell: cd: getcwd error");
