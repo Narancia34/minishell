@@ -67,7 +67,18 @@ void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s
 		signal(SIGQUIT, SIG_DFL);
 		if (redirect_in(o_args, *env_list) == 1)
 		{
+			free_commands(input);
 			clean_up(NULL, args);
+			clean_up(NULL, envp);
+			t_env *tmp;
+			while (*env_list)
+			{
+				free((*env_list)->var_name);
+				free((*env_list)->var_value);
+				tmp = *env_list;
+				*env_list = (*env_list)->next;
+				free(tmp);
+			}
 			exit(EXIT_FAILURE);
 		}
 		cmd_path = find_cmd_path(args[0], envp);

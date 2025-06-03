@@ -14,14 +14,41 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+char	*make_file_name()
+{
+	char	*res;
+	int		fd;
+	int		i;
+	ssize_t	b;
+
+	res = malloc(sizeof(char) * 10);
+	if (!res)
+		return (NULL);
+	fd = open("/dev/urandom", O_RDONLY);
+	b = read(fd, res, 9);
+	if (b == -1)
+		perror("read()");
+	res[9] = '\0';
+	close(fd);
+	i = 0;
+	while (res[i])
+	{
+		res[i] = (res[i] % 26) + 'a';
+		i++;
+	}
+	return (res);
+}
+
 int	ft_here_doc(char *delimiter, t_env *env_list)
 {
 	char	*line;
 	char	*res;
 	char	*tmp;
+	char	*file_name;
 	int		fd;
 	res = ft_strdup("");
-	setup_signals();
+	signal(SIGQUIT, SIG_IGN);
+	signal(SIGINT, SIG_DFL);
 	while (1)
 	{
 		line = readline(">");
@@ -40,7 +67,8 @@ int	ft_here_doc(char *delimiter, t_env *env_list)
 		free(tmp);
 		free(line);
 	}
-	fd = open("test", O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	file_name = make_file_name();
+	fd = open(file_name, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd == -1)
 	{
 		printf("didnt open\n");
@@ -49,10 +77,11 @@ int	ft_here_doc(char *delimiter, t_env *env_list)
 	ft_putstr_fd(expander_heredoc(res, env_list), fd);
 	free(res);
 	close(fd);
-	fd = open("test", O_RDONLY, 0644);
+	fd = open(file_name, O_RDONLY, 0644);
 	dup2(fd, STDIN_FILENO);
 	close(fd);
-	unlink("test");
+	unlink(file_name);
+	free(file_name);
 	return (0);
 }
 int	redirect_in(char **args, t_env *env_list)
@@ -71,7 +100,7 @@ int	redirect_in(char **args, t_env *env_list)
 		{
 			fd_out = open(args[i + 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 			if (fd_out == -1)
-				ret = 1;
+				return (1);
 			dup2(fd_out, STDOUT_FILENO);
 			close(fd_out);
 			i += 2;
@@ -80,7 +109,9 @@ int	redirect_in(char **args, t_env *env_list)
 		{
 			fd_in = open(args[i + 1], O_RDONLY);
 			if (fd_in == -1)
-				ret = 1;
+			{
+				return (1);
+			}
 			else
 			{
 				dup2(fd_in, STDIN_FILENO);
