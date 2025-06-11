@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 10:17:15 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/05/19 17:49:22 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/11 11:22:51 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,20 +52,37 @@ void	handle_exec(char *path, char **args, char **envp, t_env **env_list, t_comma
 	}
 }
 
-void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s, t_env **env_list, t_command *input)
+void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s, t_env **env_list, t_command *input, t_here_docs *here_docs)
 {
 	pid_t	pid;
 	int		status;
 	char	*cmd_path;
 
 	(void)has_pipe;
+	/*if (redirect_in(o_args, *env_list) == 1)*/
+	/*{*/
+	/*	free_commands(input);*/
+	/*	clean_up(NULL, args);*/
+	/*	clean_up(NULL, envp);*/
+	/*	t_env *tmp;*/
+	/*	while (*env_list)*/
+	/*	{*/
+	/*		free((*env_list)->var_name);*/
+	/*		free((*env_list)->var_value);*/
+	/*		tmp = *env_list;*/
+	/*		*env_list = (*env_list)->next;*/
+	/*		free(tmp);*/
+	/*	}*/
+	/*	*exit_s = 1;*/
+	/*	return ;*/
+	/*}*/
 	ignore_signals();
 	pid = fork();
 	if (pid == 0)
 	{
 		signal(SIGINT, SIG_DFL);
 		signal(SIGQUIT, SIG_DFL);
-		if (redirect_in(o_args, *env_list) == 1)
+		if (redirect_in(o_args, *env_list, here_docs) == 1)
 		{
 			free_commands(input);
 			clean_up(NULL, args);
@@ -109,11 +126,11 @@ void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s
 	}
 }
 
-void	exec_piped_cmd(char **args, char **envp, char **o_args, t_env **env_list, t_command *input, t_pid *pid_list)
+void	exec_piped_cmd(char **args, char **envp, char **o_args, t_env **env_list, t_command *input, t_pid *pid_list, t_here_docs *here_docs)
 {
 	char	*cmd_path;
 
-	if (redirect_in(o_args, *env_list) == 1)
+	if (redirect_in(o_args, *env_list, here_docs) == 1)
 	{
 		clean_up(NULL, args);
 		exit(EXIT_FAILURE);

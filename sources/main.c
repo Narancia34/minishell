@@ -11,6 +11,7 @@
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
+#include <unistd.h>
 
 void	free_tokens(t_token *head)
 {
@@ -63,6 +64,23 @@ void print_tokens(t_token *list)
     }
 }
 
+void	save_fd(int flag)
+{
+	static int	out;
+	static int	in;
+
+	if (flag == 1)
+	{
+		out = dup(STDOUT_FILENO);
+		in = dup(STDIN_FILENO);
+	}
+	if (flag == 2)
+	{
+		dup2(out, STDOUT_FILENO);
+		dup2(in, STDIN_FILENO);
+	}
+}
+
 int main(int ac, char **av, char **env)
 {
 	(void)av;
@@ -75,6 +93,7 @@ int main(int ac, char **av, char **env)
 	t_token *tokens;
 	t_command *commands;
 
+	save_fd(1);
 	exit_s = 0;
 	env_list = init_env(env);
 	handle_shlvl(&env_list);

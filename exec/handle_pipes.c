@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 10:51:42 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/05/23 16:56:11 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/11 11:33:23 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -36,7 +36,23 @@ void	handle_pipe_util_b(int *prev_fd, int*fd)
 	(*prev_fd) = fd[0];
 }
 
-void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit_s)
+int	count_here_docs(char	**cmd)
+{
+	int	i;
+	int	res;
+
+	i = 0;
+	res = 0;
+	while (cmd[i])
+	{
+		if (ft_strcmp(cmd[i], "<<") == 0)
+			res++;
+		i++;
+	}
+	return (res);
+}
+
+void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit_s, t_here_docs *here_docs)
 {
 	int		fd[2];
 	int		prev_fd;
@@ -47,6 +63,7 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 	t_pid	*pid_list;
 	t_pid	*tmp_n;
 	t_pid	*to_free;
+	int	count;
 
 	prev_fd = -1;
 	tmp = input;
@@ -73,15 +90,21 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 				continue;
 			}
 			if (is_builtin(args[0]) == 1)
-				exec_builtin(args, env_list, tmp->args, exit_s);
+				exec_builtin(args, env_list, tmp->args, exit_s, here_docs);
 			else
-				exec_piped_cmd(args, envp, tmp->args, env_list, input, pid_list);
+				exec_piped_cmd(args, envp, tmp->args, env_list, input, pid_list, here_docs);
 			exit(*exit_s);
 		}
 		else
 			handle_pipe_util_b(&prev_fd, fd);
 		tmp_n = make_pid_node(pid);
 		add_pid_node(&pid_list, tmp_n);
+		count = count_here_docs(tmp->args);
+		while (count > 0)
+		{
+			here_docs = here_docs->next;
+			count--;
+		}
 		tmp = tmp->next;
 	}
 	tmp_n = pid_list;
