@@ -6,7 +6,7 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 13:49:55 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/06/11 11:26:42 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/12 11:56:16 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -172,7 +172,10 @@ void	add_pid_node(t_pid **pid_list, t_pid *new_n);
 void free_commands(t_command *cmd);
 char	*expander_heredoc(char	*input, t_env *env_list);
 void	save_fd(int flag);
-t_here_docs	*here_doc(t_command *input, int *exit_s, t_env *env_list);
+t_here_docs	*here_doc(t_command *input, int *exit_s, t_env *env_list, char **env);
+void	free_env(t_env **env_list);
+void	free_pids(t_pid *pid_list);
+void	free_here_docs(t_here_docs *here_docs);
 
 
 #endif

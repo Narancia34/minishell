@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 10:17:15 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/11 11:22:51 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/12 12:00:20 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,25 +22,9 @@ void	handle_exec(char *path, char **args, char **envp, t_env **env_list, t_comma
 		free_commands(input);
 		clean_up(path, args);
 		clean_up(NULL, envp);
-		t_env *tmp;
-		while (*env_list)
-		{
-			free((*env_list)->var_name);
-			free((*env_list)->var_value);
-			tmp = *env_list;
-			*env_list = (*env_list)->next;
-			free(tmp);
-		}
+		free_env(env_list);
 		if (pid_list)
-		{
-			t_pid	*tmp2;
-			while (pid_list)
-			{
-				tmp2 = pid_list;
-				pid_list = pid_list->next;
-				free(tmp2);
-			}
-		}
+			free_pids(pid_list);
 		exit(127);
 	}
 	if (execve(path, args, envp) == -1)
@@ -59,23 +43,6 @@ void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s
 	char	*cmd_path;
 
 	(void)has_pipe;
-	/*if (redirect_in(o_args, *env_list) == 1)*/
-	/*{*/
-	/*	free_commands(input);*/
-	/*	clean_up(NULL, args);*/
-	/*	clean_up(NULL, envp);*/
-	/*	t_env *tmp;*/
-	/*	while (*env_list)*/
-	/*	{*/
-	/*		free((*env_list)->var_name);*/
-	/*		free((*env_list)->var_value);*/
-	/*		tmp = *env_list;*/
-	/*		*env_list = (*env_list)->next;*/
-	/*		free(tmp);*/
-	/*	}*/
-	/*	*exit_s = 1;*/
-	/*	return ;*/
-	/*}*/
 	ignore_signals();
 	pid = fork();
 	if (pid == 0)
@@ -87,19 +54,13 @@ void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s
 			free_commands(input);
 			clean_up(NULL, args);
 			clean_up(NULL, envp);
-			t_env *tmp;
-			while (*env_list)
-			{
-				free((*env_list)->var_name);
-				free((*env_list)->var_value);
-				tmp = *env_list;
-				*env_list = (*env_list)->next;
-				free(tmp);
-			}
+			free_env(env_list);
+			free_here_docs(here_docs);
 			exit(EXIT_FAILURE);
 		}
 		cmd_path = find_cmd_path(args[0], envp);
 		handle_exec(cmd_path, args, envp, env_list, input, NULL);
+		free_here_docs(here_docs);
 	}
 	else
 {

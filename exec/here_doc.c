@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 10:26:23 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/11 11:16:15 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/12 11:58:24 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,14 +64,14 @@ void	add_heredoc_node(t_here_docs **here_docs, t_here_docs *new_n)
 	current->next = new_n;
 }
 
-char	*handle_here_doc(char *delimiter, t_env *env_list)
+char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *input, char **env)
 {
 	char	*line;
 	char	*res;
 	char	*tmp;
 	char	*file_name;
 	int		fd;
-pid_t	pid;
+	pid_t	pid;
 	int	status;
 
 	ignore_signals();
@@ -109,27 +109,39 @@ pid_t	pid;
 		ft_putstr_fd(expander_heredoc(res, env_list), fd);
 		free(res);
 		close(fd);
-		free(file_name);
+		(void)env;
+		free_env(&env_list);
+		free_commands(input);
+		clean_up(file_name, env);
 		exit(EXIT_SUCCESS);
 	}
 	waitpid(pid, &status, 0);
+	if (WIFEXITED(status))
+		*exit_s = WEXITSTATUS(status);
+	else if (WIFSIGNALED(status))
+	{
+	g_signal_flag = WTERMSIG(status);
+	*exit_s = 130;
+	printf("\n");
+	unlink(file_name);
+	setup_signals();
+	return (NULL);
+}
 	setup_signals();
 	return (file_name);
 }
 
-t_here_docs	*here_doc(t_command *input, int *exit_s, t_env *env_list)
+t_here_docs	*here_doc(t_command *input, int *exit_s, t_env *env_list, char	**env)
 {
 	t_command	*tmp;
 	t_here_docs	*here_docs;
 	t_here_docs	*tmp_n;
 	char	*file_name;
 	int	i;
-	int	in;
 
 	(void)exit_s;
 	here_docs = NULL;
 	tmp = input;
-	in = dup(STDIN_FILENO);
 	while (tmp)
 	{
 		i = 0;
@@ -137,9 +149,10 @@ t_here_docs	*here_doc(t_command *input, int *exit_s, t_env *env_list)
 		{
 			if (ft_strcmp(tmp->args[i], "<<") == 0)
 			{
-				
-				dup2(in, STDIN_FILENO);
-				file_name = handle_here_doc(tmp->args[i+1], env_list);
+				save_fd(2);
+				file_name = handle_here_doc(tmp->args[i+1], env_list, exit_s, input, env);
+				if (file_name == NULL)
+					return (NULL);
 				tmp_n = make_heredoc_node(file_name);
 				add_heredoc_node(&here_docs, tmp_n);
 				i++;

@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 14:02:58 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/11 11:34:44 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/12 11:46:46 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,6 +110,7 @@ int	read_from_heredoc(t_here_docs *here_docs)
 	dup2(fd, STDIN_FILENO);
 	close(fd);
 	unlink(here_docs->file_name);
+	free(here_docs->file_name);
 	return (0);
 }
 

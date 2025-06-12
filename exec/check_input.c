@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 14:11:27 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/11 11:34:13 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/12 12:06:06 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -87,7 +87,13 @@ int	check_input(t_command *input, t_env **env_list, char **envp, int *exit_s)
 	char	**args;
 	t_here_docs	*here_docs;
 
-	here_docs = here_doc(input, exit_s, *env_list);
+	here_docs = here_doc(input, exit_s, *env_list, envp);
+	if (g_signal_flag == 2)
+	{
+		free_here_docs(here_docs);
+		*exit_s = 130;
+		return (2);
+	}
 	if (has_pipe(input) > 1)
 		handle_pipeline(input, env_list, envp, exit_s, here_docs);
 	else
@@ -116,5 +122,7 @@ int	check_input(t_command *input, t_env **env_list, char **envp, int *exit_s)
 			tmp = tmp->next;
 		}
 	}
+	if (here_docs)
+		free_here_docs(here_docs);
 	return (0);
 }

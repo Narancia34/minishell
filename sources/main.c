@@ -6,7 +6,7 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 11:09:50 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/04/12 12:36:07 by mlabrirh         ###   ########.fr       */
+/*   Updated: 2025/06/12 11:24:39 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,6 +92,7 @@ int main(int ac, char **av, char **env)
 	int		exit_s;
 	t_token *tokens;
 	t_command *commands;
+	int		ret;
 
 	save_fd(1);
 	exit_s = 0;
@@ -132,7 +133,8 @@ int main(int ac, char **av, char **env)
 		}
 		free_tokens(tokens);
 		u_env = upd_env(env_list);
-		if (check_input(commands, &env_list, u_env, &exit_s) == 1)
+		ret = check_input(commands, &env_list, u_env, &exit_s);
+		if (ret == 1)
 		{
 			free_commands(commands);
 			clean_up(NULL, u_env);
@@ -141,14 +143,6 @@ int main(int ac, char **av, char **env)
 		free_commands(commands);
 		clean_up(NULL, u_env);
 	}
-	t_env	*env_to_free;
-	while (env_list)
-	{
-		free(env_list->var_value);
-		free(env_list->var_name);
-		env_to_free = env_list;
-		env_list = env_list->next;
-		free(env_to_free);
-	}
+	free_env(&env_list);
 	return 0;
 }
