@@ -93,6 +93,13 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 				exec_builtin(args, env_list, tmp->args, exit_s, here_docs);
 			else
 				exec_piped_cmd(args, envp, tmp->args, env_list, input, pid_list, here_docs);
+			clean_up(NULL, args);
+			clean_up(NULL, envp);
+			free_commands(input);
+			free_env(env_list);
+			free_pids(pid_list);
+			if (here_docs)
+				free_here_docs(here_docs);
 			exit(*exit_s);
 		}
 		else

@@ -37,7 +37,10 @@ int	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s, t_her
 	int saved_stdin = dup(STDIN_FILENO);
 	if (redirect_in(o_args, *env_list, here_docs) == 1) {
 		ft_putstr_fd("minishell: redirection error\n", 2);
-		dup2(saved_stdout, STDOUT_FILENO);  // Restore stdout
+		*exit_s = 1;
+		if (here_docs)
+			free_here_docs(here_docs);
+		dup2(saved_stdout, STDOUT_FILENO);
 		close(saved_stdout);
 		close(saved_stdin);
 		return (0);

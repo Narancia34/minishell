@@ -110,7 +110,7 @@ int	read_from_heredoc(t_here_docs *here_docs)
 	dup2(fd, STDIN_FILENO);
 	close(fd);
 	unlink(here_docs->file_name);
-	free(here_docs->file_name);
+	/*free(here_docs->file_name);*/
 	return (0);
 }
 

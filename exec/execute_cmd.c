@@ -55,12 +55,13 @@ void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s
 			clean_up(NULL, args);
 			clean_up(NULL, envp);
 			free_env(env_list);
-			free_here_docs(here_docs);
+			if (here_docs)
+				free_here_docs(here_docs);
 			exit(EXIT_FAILURE);
 		}
+		free_here_docs(here_docs);
 		cmd_path = find_cmd_path(args[0], envp);
 		handle_exec(cmd_path, args, envp, env_list, input, NULL);
-		free_here_docs(here_docs);
 	}
 	else
 {
@@ -94,9 +95,12 @@ void	exec_piped_cmd(char **args, char **envp, char **o_args, t_env **env_list, t
 	if (redirect_in(o_args, *env_list, here_docs) == 1)
 	{
 		clean_up(NULL, args);
+		clean_up(NULL, envp);
+		free_env(env_list);
+		free_here_docs(here_docs);
 		exit(EXIT_FAILURE);
 	}
+	free_here_docs(here_docs);
 	cmd_path = find_cmd_path(args[0], envp);
 	handle_exec(cmd_path, args, envp, env_list, input, pid_list);
-
 }

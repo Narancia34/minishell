@@ -88,11 +88,10 @@ int	check_input(t_command *input, t_env **env_list, char **envp, int *exit_s)
 	t_here_docs	*here_docs;
 
 	here_docs = here_doc(input, exit_s, *env_list, envp);
-	if (g_signal_flag == 2)
+	if (has_heredoc(input) == 0 && !here_docs)
 	{
 		free_here_docs(here_docs);
-		*exit_s = 130;
-		return (2);
+		return (0);
 	}
 	if (has_pipe(input) > 1)
 		handle_pipeline(input, env_list, envp, exit_s, here_docs);
@@ -112,6 +111,7 @@ int	check_input(t_command *input, t_env **env_list, char **envp, int *exit_s)
 			{
 				if (exec_builtin(args, env_list, tmp->args, exit_s, here_docs) == 1)
 				{
+					free_here_docs(here_docs);
 					clean_up(NULL, args);
 					return (1);
 				}

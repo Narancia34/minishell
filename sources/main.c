@@ -92,7 +92,6 @@ int main(int ac, char **av, char **env)
 	int		exit_s;
 	t_token *tokens;
 	t_command *commands;
-	int		ret;
 
 	save_fd(1);
 	exit_s = 0;
@@ -133,8 +132,7 @@ int main(int ac, char **av, char **env)
 		}
 		free_tokens(tokens);
 		u_env = upd_env(env_list);
-		ret = check_input(commands, &env_list, u_env, &exit_s);
-		if (ret == 1)
+		if (check_input(commands, &env_list, u_env, &exit_s) == 1)
 		{
 			free_commands(commands);
 			clean_up(NULL, u_env);

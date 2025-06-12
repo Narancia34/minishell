@@ -64,12 +64,13 @@ void	add_heredoc_node(t_here_docs **here_docs, t_here_docs *new_n)
 	current->next = new_n;
 }
 
-char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *input, char **env)
+char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *input, char **env, t_here_docs *here_docs)
 {
 	char	*line;
 	char	*res;
 	char	*tmp;
 	char	*file_name;
+	char	*expanded;
 	int		fd;
 	pid_t	pid;
 	int	status;
@@ -106,13 +107,16 @@ char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *
 			ft_putstr_fd("couldnt open here-document\n", fd);
 			return (NULL);
 		}
-		ft_putstr_fd(expander_heredoc(res, env_list), fd);
+		expanded = expander_heredoc(res, env_list);
+		ft_putstr_fd(expanded, fd);
+		free(expanded);
 		free(res);
 		close(fd);
 		(void)env;
 		free_env(&env_list);
 		free_commands(input);
 		clean_up(file_name, env);
+		free_here_docs(here_docs);
 		exit(EXIT_SUCCESS);
 	}
 	waitpid(pid, &status, 0);
@@ -120,11 +124,12 @@ char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *
 		*exit_s = WEXITSTATUS(status);
 	else if (WIFSIGNALED(status))
 	{
-	g_signal_flag = WTERMSIG(status);
 	*exit_s = 130;
 	printf("\n");
 	unlink(file_name);
+	free(file_name);
 	setup_signals();
+	g_signal_flag = WTERMSIG(status);
 	return (NULL);
 }
 	setup_signals();
@@ -134,10 +139,10 @@ char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *
 t_here_docs	*here_doc(t_command *input, int *exit_s, t_env *env_list, char	**env)
 {
 	t_command	*tmp;
-	t_here_docs	*here_docs;
 	t_here_docs	*tmp_n;
 	char	*file_name;
 	int	i;
+	t_here_docs	*here_docs;
 
 	(void)exit_s;
 	here_docs = NULL;
@@ -150,10 +155,11 @@ t_here_docs	*here_doc(t_command *input, int *exit_s, t_env *env_list, char	**env
 			if (ft_strcmp(tmp->args[i], "<<") == 0)
 			{
 				save_fd(2);
-				file_name = handle_here_doc(tmp->args[i+1], env_list, exit_s, input, env);
+				file_name = handle_here_doc(tmp->args[i+1], env_list, exit_s, input, env, here_docs);
 				if (file_name == NULL)
 					return (NULL);
 				tmp_n = make_heredoc_node(file_name);
+				free(file_name);
 				add_heredoc_node(&here_docs, tmp_n);
 				i++;
 			}
