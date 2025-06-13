@@ -64,7 +64,9 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 	t_pid	*tmp_n;
 	t_pid	*to_free;
 	int	count;
+	t_here_docs	*here_docs_head;
 
+	here_docs_head = here_docs;
 	prev_fd = -1;
 	tmp = input;
 	pid_list = NULL;
@@ -87,6 +89,7 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 			{
 				perror("minishell: error parsing command!/n");
 				tmp = tmp->next;
+				free_here_docs(here_docs);
 				continue;
 			}
 			if (is_builtin(args[0]) == 1)
@@ -98,8 +101,10 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 			free_commands(input);
 			free_env(env_list);
 			free_pids(pid_list);
-			if (here_docs)
-				free_here_docs(here_docs);
+			/*if (here_docs)*/
+			/*	free_here_docs(here_docs);*/
+			if (here_docs_head)
+				free_here_docs(here_docs_head);
 			exit(*exit_s);
 		}
 		else
