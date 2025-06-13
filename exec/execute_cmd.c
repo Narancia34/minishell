@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 10:17:15 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/12 12:00:20 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/13 14:19:33 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,11 @@ void	handle_exec(char *path, char **args, char **envp, t_env **env_list, t_comma
 	if (execve(path, args, envp) == -1)
 	{
 		perror("failed to execute command");
+		clean_up(NULL, envp);
 		free_commands(input);
+		free_env(env_list);
+		if (pid_list)
+			free_pids(pid_list);
 		clean_up(path, args);
 		exit(126);
 	}
@@ -94,6 +98,7 @@ void	exec_piped_cmd(char **args, char **envp, char **o_args, t_env **env_list, t
 
 	if (redirect_in(o_args, *env_list, here_docs) == 1)
 	{
+		free_commands(input);
 		clean_up(NULL, args);
 		clean_up(NULL, envp);
 		free_env(env_list);

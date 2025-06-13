@@ -99,10 +99,13 @@ char	*find_cmd_path(char *full_cmd, char **envp)
 
 	if (!full_cmd || !*full_cmd)
 		return (NULL);
-	if (access(full_cmd, F_OK) == 0)
-		return (ft_strdup(full_cmd));
 	if (full_cmd[0] == '.' || full_cmd[0] == '/')
-		return (NULL);
+	{
+		if (access(full_cmd, F_OK) == 0)
+			return (ft_strdup(full_cmd));
+		else
+			return (NULL);
+	}
 	if (!envp || !envp[0])
 		return (NULL);
 	pre_path = find_pre_path(envp);

@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 10:51:42 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/11 11:33:23 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/13 11:12:44 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -89,20 +89,24 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 			{
 				perror("minishell: error parsing command!/n");
 				tmp = tmp->next;
-				free_here_docs(here_docs);
-				continue;
+				clean_up(NULL, args);
+				clean_up(NULL, envp);
+				free_commands(input);
+				free_env(env_list);
+				free_pids(pid_list);
+				if (here_docs_head)
+					free_here_docs(here_docs_head);
+				exit (*exit_s);
 			}
 			if (is_builtin(args[0]) == 1)
 				exec_builtin(args, env_list, tmp->args, exit_s, here_docs);
 			else
-				exec_piped_cmd(args, envp, tmp->args, env_list, input, pid_list, here_docs);
+				exec_piped_cmd(args, envp, tmp->args, env_list, input, pid_list, here_docs_head);
 			clean_up(NULL, args);
 			clean_up(NULL, envp);
 			free_commands(input);
 			free_env(env_list);
 			free_pids(pid_list);
-			/*if (here_docs)*/
-			/*	free_here_docs(here_docs);*/
 			if (here_docs_head)
 				free_here_docs(here_docs_head);
 			exit(*exit_s);
