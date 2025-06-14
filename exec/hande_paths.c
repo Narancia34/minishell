@@ -36,10 +36,7 @@ char	*find_pre_path(char **envp)
 	while (envp[i] && ft_strncmp(envp[i], "PATH=", 5) != 0)
 		i++;
 	if (!envp[i])
-	{
-		perror("cant find path in env!\n");
 		return (NULL);
-	}
 	res = ft_strdup(envp[i] + 5);
 	return (res);
 }
