@@ -12,6 +12,48 @@
 
 #include "../includes/minishell.h"
 
+int	is_digits(char	*arg)
+{
+	int	i;
+
+	i = 0;
+	if (arg[i] == '+' || arg[i] == '-')
+		i = 1;
+	while (arg[i])
+	{
+		if (!ft_isdigit(arg[i]))
+		{
+			printf("exit\nexit: %s: numeric argument required\n", arg);
+			return (2);
+		}
+		i++;
+	}
+	return (ft_atoi(arg));
+}
+
+int	ft_exit(char **arg)
+{
+	int status;
+
+	if (!arg[1])
+	{
+		printf("exit\n");
+		return (0);
+	}
+	status = is_digits(arg[1]);
+	if (status == 2)
+	{
+		return(2);
+	}
+	if (arg[2])
+	{
+		printf("exit\nminishell: exit: too many arguments\n");
+		return 257;
+	}
+	printf("exit\n");
+	return (ft_atoi(arg[1])  % 256);
+}
+
 void	change_pwd_env(char *old_dir, char *current_dir, t_env **env_list)
 {
 	t_env *current = *env_list;
@@ -35,11 +77,11 @@ int	ft_cd(char **arg, t_env **env_list)
 {
 	char	current_dir[1024];
 	char	old_dir[1024];
-	char	*path;
+	char	*path = NULL;
 	t_env	*tmp;
+	int		should_free = 0;
 
 	getcwd(old_dir, sizeof(old_dir));
-	path = ft_strdup("");
 	if (arg[1] == NULL)
 	{
 		tmp = *env_list;
@@ -48,26 +90,31 @@ int	ft_cd(char **arg, t_env **env_list)
 			if (ft_strcmp("HOME", tmp->var_name) == 0)
 			{
 				path = ft_strdup(tmp->var_value);
+				should_free = 1;
 				break ;
 			}
 			tmp = tmp->next;
 		}
-		if (!path[0])
+		if (!path)
 		{
 			printf("minishell: cd: HOME not set\n");
-			free(path);
 			return 1;
 		}
 	}
 	else
+	{
 		path = arg[1];
+		should_free = 0;
+	}
 	if (chdir(path) != 0)
 	{
 		fprintf(stderr, "minishell: cd: %s: %s\n", path, strerror(errno));
-		free(path);
+		if (should_free)
+			free(path);
 		return 1;
 	}
-	free(path);
+	if (should_free)
+		free(path);
 	if (getcwd(current_dir, sizeof(current_dir)) == NULL)
 	{
 		perror("minishell: cd: getcwd error");
@@ -76,6 +123,52 @@ int	ft_cd(char **arg, t_env **env_list)
 	change_pwd_env(old_dir, current_dir, env_list);
 	return 0;
 }
+
+/*int	ft_cd(char **arg, t_env **env_list)*/
+/*{*/
+/*	char	current_dir[1024];*/
+/*	char	old_dir[1024];*/
+/*	char	*path;*/
+/*	t_env	*tmp;*/
+/**/
+/*	getcwd(old_dir, sizeof(old_dir));*/
+/*	path = ft_strdup("");*/
+/*	if (arg[1] == NULL)*/
+/*	{*/
+/*		tmp = *env_list;*/
+/*		while (tmp)*/
+/*		{*/
+/*			if (ft_strcmp("HOME", tmp->var_name) == 0)*/
+/*			{*/
+/*				path = ft_strdup(tmp->var_value);*/
+/*				break ;*/
+/*			}*/
+/*			tmp = tmp->next;*/
+/*		}*/
+/*		if (!path[0])*/
+/*		{*/
+/*			printf("minishell: cd: HOME not set\n");*/
+/*			free(path);*/
+/*			return 1;*/
+/*		}*/
+/*	}*/
+/*	else*/
+/*		path = arg[1];*/
+/*	if (chdir(path) != 0)*/
+/*	{*/
+/*		fprintf(stderr, "minishell: cd: %s: %s\n", path, strerror(errno));*/
+/*		free(path);*/
+/*		return 1;*/
+/*	}*/
+/*	free(path);*/
+/*	if (getcwd(current_dir, sizeof(current_dir)) == NULL)*/
+/*	{*/
+/*		perror("minishell: cd: getcwd error");*/
+/*		return 1;*/
+/*	}*/
+/*	change_pwd_env(old_dir, current_dir, env_list);*/
+/*	return 0;*/
+/*}*/
 
 int	ft_echo(char **arg)
 {
@@ -266,17 +359,24 @@ int	add_to_env(t_env **env_list, char *arg)
 		if (ft_strcmp(var_name, tmp->var_name) == 0)
 		{
 			if (flag == 1)
+			{
+				free(var_name);
+				free(var_value);
 				return (0);
+			}
 			tmp->flag = 0;
 			free(tmp->var_value);
-			free(var_name);
 			tmp->var_value = ft_strdup(var_value);
+			free(var_name);
+			free(var_value);
 			return (0);
 		}
 		tmp = tmp->next;
 	}
 	new = make_node(var_name, var_value, flag);
 	add_to_list(env_list, new);
+	free(var_name);
+	free(var_value);
 	return (0);
 }
 

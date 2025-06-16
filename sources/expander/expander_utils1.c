@@ -56,37 +56,32 @@ char	*append_character_as_is(const char **start, char *result)
 	return result;
 }
 
-char	*expand_env_vars(char *input, int exit_status, t_env *env_list)
-{
-	char		*result = NULL;
-	const char	*start;
-	char		quote;
-	char	temp[2];
 
-	start = input;
-	quote = '\0';
-	while (*start)
-	{
-		if ((*start == '"' || *start == '\'') && (!quote || quote == *start))
-		{
-			if (quote == *start)
-				quote = '\0'; // End the quote
-			else
-				quote = *start; // Start the quote
-			temp[0] = *start;
-			temp[1] = '\0';
-			result = strjoin_and_free(result, temp);
-			start++;
-		}
-		else if (quote != '\'' && *start == '$' && (is_valid_var_char(*(start + 1), true) || *(start + 1) == '?'))
-		{
-			if (*(start + 1) == '?')
-				handle_exit_status(exit_status, &result, &start);
-			else 
-				handle_env_var(env_list, &result, &start);
-		}
-		else
-			result = append_character_as_is(&start, result);
-	}
-	return (result);
+char *expand_env_vars(char *input, int exit_status, t_env *env_list)
+{
+    char    *result = NULL;
+    const char  *start = input;
+    char    quote = '\0';
+
+    while (*start)
+    {
+        if ((*start == '"' || *start == '\''))
+        {
+            if (quote == *start)
+                quote = '\0';
+            else if (!quote)
+                quote = *start;
+            result = append_character_as_is(&start, result);
+        }
+        else if (quote != '\'' && *start == '$' && (is_valid_var_char(*(start + 1), true) || *(start + 1) == '?'))
+        {
+            if (*(start + 1) == '?')
+                handle_exit_status(exit_status, &result, &start);
+            else
+                handle_env_var(env_list, &result, &start);
+        }
+        else
+            result = append_character_as_is(&start, result);
+    }
+    return result;
 }

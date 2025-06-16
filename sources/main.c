@@ -6,12 +6,11 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 11:09:50 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/06/12 11:24:39 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/04/12 12:36:07 by mlabrirh         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-#include <unistd.h>
 
 void	free_tokens(t_token *head)
 {
@@ -86,21 +85,23 @@ int main(int ac, char **av, char **env)
 	(void)av;
 	(void)ac;
 	char *input;
-	char *expanded_input;
 	t_env    *env_list;
 	char	**u_env;
+	t_var    *var_list;
 	int		exit_s;
 	t_token *tokens;
 	t_command *commands;
+	int		ret;
 
 	save_fd(1);
 	exit_s = 0;
 	env_list = init_env(env);
+	var_list = NULL;
 	handle_shlvl(&env_list);
 	setup_signals();
 	while (1)
 	{
-		/*g_signal_flag = 0;*/
+		g_signal_flag = 0;
 		input = readline("minishell$ ");
 		if (g_signal_flag == SIGINT)
 		{
@@ -112,16 +113,12 @@ int main(int ac, char **av, char **env)
 		}
 		if (*input)
 			add_history(input);
-		expanded_input = expand_input(input, exit_s, env_list);
+		tokens = tokenize(input);
 		free(input);
-		if (!expanded_input)
-			continue;
-		tokens = tokenize(expanded_input);
-		free(expanded_input);
-		if (!tokens)
-			continue;
+		expand_tokens(tokens, exit_s, env_list);
 		if (!validate_syntax(tokens))
 		{
+			exit_s = 2;
 			free_tokens(tokens);
 			continue;
 		}
@@ -130,17 +127,27 @@ int main(int ac, char **av, char **env)
 			free_tokens(tokens);
 			continue;
 		}
-		free_tokens(tokens);
 		u_env = upd_env(env_list);
-		if (check_input(commands, &env_list, u_env, &exit_s) == 1)
+		free_tokens(tokens);
+		ret = check_input(commands, &env_list, u_env, &exit_s);
+		if (ret != 257)
 		{
 			free_commands(commands);
 			clean_up(NULL, u_env);
-			break;
+			free_env(&env_list);
+			exit(ret);
 		}
 		free_commands(commands);
 		clean_up(NULL, u_env);
 	}
-	free_env(&env_list);
+	t_env	*env_to_free;
+	while (env_list)
+	{
+		free(env_list->var_value);
+		free(env_list->var_name);
+		env_to_free = env_list;
+		env_list = env_list->next;
+		free(env_to_free);
+	}
 	return 0;
 }

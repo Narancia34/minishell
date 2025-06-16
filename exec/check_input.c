@@ -86,12 +86,13 @@ int	check_input(t_command *input, t_env **env_list, char **envp, int *exit_s)
 	t_command	*tmp;
 	char	**args;
 	t_here_docs	*here_docs;
+	int		ret;
 
 	here_docs = here_doc(input, exit_s, *env_list, envp);
 	if (has_heredoc(input) == 0 && !here_docs)
 	{
 		free_here_docs(here_docs);
-		return (0);
+		return (257);
 	}
 	if (has_pipe(input) > 1)
 		handle_pipeline(input, env_list, envp, exit_s, here_docs);
@@ -109,11 +110,12 @@ int	check_input(t_command *input, t_env **env_list, char **envp, int *exit_s)
 			}
 			else if (is_builtin(args[0]) == 1)
 			{
-				if (exec_builtin(args, env_list, tmp->args, exit_s, here_docs) == 1)
+				ret = exec_builtin(args, env_list, tmp->args, exit_s, here_docs);
+				if (ret != 257)
 				{
 					free_here_docs(here_docs);
 					clean_up(NULL, args);
-					return (1);
+					return (ret);
 				}
 			}
 			else
@@ -124,5 +126,5 @@ int	check_input(t_command *input, t_env **env_list, char **envp, int *exit_s)
 	}
 	if (here_docs)
 		free_here_docs(here_docs);
-	return (0);
+	return (257);
 }

@@ -6,7 +6,7 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 13:49:55 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/06/13 11:12:12 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/05/23 16:42:54 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -53,6 +53,8 @@ typedef struct s_token
 {
 	char			*value;
 	token_type		type;
+	int is_single_quoted;
+    int is_double_quoted;
 	struct s_token	*next;
 } t_token;
 
@@ -110,6 +112,7 @@ void	free_tokens(t_token *head);
 
 //expander
 t_env	*find_env_var(t_env *env_list, const char *var_name);
+void expand_tokens(t_token *tokens, int exit_status, t_env *env_list);
 char	*strjoin_and_free(char *s1, char *s2);
 char	*expand_env_vars(char *input, int exit_status, t_env *env_list);
 char	*remove_quotes(char *input);
@@ -123,7 +126,7 @@ char	*expand_tilde(char *input);
 char	*get_env_value(t_env *env_list, const char *var_name);
 
 //tokens
-t_token		*ft_add_token(t_token **token_list, char *value, token_type type);
+t_token *ft_add_token(t_token **token_list, char *value, token_type type, int double_quote, int single_qoute);
 t_token	*tokenize(const char *input);
 t_command	*build_commands(t_token *tokens);
 void	set_size(t_command *head);
@@ -131,7 +134,7 @@ void	set_type(t_command *head);
 char *read_quoted(const char *input, int *i);
 char	**ft_realloc(char *arg, char **old_arr);
 char *read_operator(const char *str, int *i);
-char *read_word(const char *str, int *i);
+char *read_word(const char *str, int *i, int *is_single_quoted, int *is_double_quoted);
 token_type	get_operation_type(const char *op);
 
 //check syntax
@@ -141,6 +144,7 @@ bool	validate_syntax(t_token *tokens);
 int		handle_assignment(t_env **env_list, const char *assignment);
 void	print_commands(t_command *cmd);   // Optional for debug
 void	print_tokens(t_token *list);      // Optional for debug
+
 
 //execution part
 char	*find_cmd_path(char *full_cmd, char **envp);
@@ -176,6 +180,7 @@ t_here_docs	*here_doc(t_command *input, int *exit_s, t_env *env_list, char **env
 void	free_env(t_env **env_list);
 void	free_pids(t_pid *pid_list);
 void	free_here_docs(t_here_docs *here_docs);
+int	ft_exit(char **arg);
 
 
 #endif

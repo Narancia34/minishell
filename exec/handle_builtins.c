@@ -31,6 +31,7 @@ int	is_builtin(char *arg)
 
 int	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s, t_here_docs *here_docs)
 {
+	int	res;
 	if (!arg || !arg[0])
 		return (0);
 	int saved_stdout = dup(STDOUT_FILENO);
@@ -43,7 +44,7 @@ int	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s, t_her
 		dup2(saved_stdout, STDOUT_FILENO);
 		close(saved_stdout);
 		close(saved_stdin);
-		return (0);
+		return (257);
 	}
 	if (ft_strcmp(arg[0], "echo") == 0)
 		*exit_s = ft_echo(arg);
@@ -54,7 +55,13 @@ int	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s, t_her
 	if (ft_strcmp("env", arg[0]) == 0)
 		*exit_s = ft_env(*env_list);
 	if (ft_strcmp("exit", arg[0]) == 0)
-		return (1);
+	{
+		res = ft_exit(arg);
+		if (res == 257)
+			*exit_s = 1;
+		else
+			return (res);
+	}
 	if (ft_strcmp(arg[0], "unset") == 0)
 		*exit_s = ft_unset(arg, env_list);
 	if (ft_strcmp(arg[0], "export") == 0)
@@ -63,5 +70,5 @@ int	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s, t_her
 	dup2(saved_stdin, STDIN_FILENO);
 	close(saved_stdout);
 	close(saved_stdin);
-	return (0);
+	return (257);
 }

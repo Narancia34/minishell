@@ -33,31 +33,78 @@ void	free_cmd(t_command *cmd)
 	}
 }
 
+static int is_quoted_empty_token(t_token *token)
+{
+    return token &&
+        (!token->value || !*token->value) &&
+        (token->is_single_quoted || token->is_double_quoted);
+}
+
+static int append_arg(t_command *cmd, const char *value)
+{
+    char *arg_dup = ft_strdup(value);
+    if (!arg_dup)
+        return 0;
+    char **tmp_args = ft_realloc(arg_dup, cmd->args);
+    if (!tmp_args) {
+        free(arg_dup);
+        return 0;
+    }
+    cmd->args = tmp_args;
+    cmd->arg_size++;
+    return 1;
+}
+
+static int fill_command_args(t_command *cmd, t_token **tokens)
+{
+    while (*tokens && (*tokens)->type != TOKEN_PIPE)
+	{
+        if (!append_arg(cmd, (*tokens)->value))
+            return 0;
+        *tokens = (*tokens)->next;
+    }
+    return 1;
+}
+
+static int handle_quoted_empty_command(t_command *cmd, t_token **tokens)
+{
+    if (!append_arg(cmd, (*tokens)->value))
+        return 0;
+    *tokens = (*tokens)->next;
+    return fill_command_args(cmd, tokens);
+}
+
+static void skip_empty_unquoted_tokens(t_token **tokens)
+{
+    while (*tokens && (*tokens)->type != TOKEN_PIPE &&
+          (!(*tokens)->value || !*((*tokens)->value)) &&
+          !((*tokens)->is_single_quoted || (*tokens)->is_double_quoted))
+        *tokens = (*tokens)->next;
+}
+
 static t_command *create_command(t_token **tokens)
 {
-    t_command *cmd = malloc(sizeof(t_command));
+    t_command *cmd;
+
+	cmd = malloc(sizeof(t_command));
     if (!cmd)
         return NULL;
     cmd->args = NULL;
     cmd->arg_size = 0;
     cmd->type = TOKEN_WORD;
     cmd->next = NULL;
-    while (*tokens && (*tokens)->type != TOKEN_PIPE)
-    {
-        char *arg_dup = ft_strdup((*tokens)->value);
-        if (!arg_dup) {
-            free_single_command(cmd);
-            return NULL;
-        }
-        char **tmp_args = ft_realloc(arg_dup, cmd->args);
-        if (!tmp_args) {
-            free(arg_dup);
-            free_single_command(cmd);
-            return NULL;
-        }
-        cmd->args = tmp_args;
-        *tokens = (*tokens)->next;
+
+    if (is_quoted_empty_token(*tokens))
+	{
+        if (!handle_quoted_empty_command(cmd, tokens))
+            return (free_single_command(cmd), NULL);
+        if (*tokens && (*tokens)->type == TOKEN_PIPE)
+            *tokens = (*tokens)->next;
+        return cmd;
     }
+    skip_empty_unquoted_tokens(tokens);
+    if (!fill_command_args(cmd, tokens))
+        return (free_single_command(cmd), NULL);
     if (*tokens && (*tokens)->type == TOKEN_PIPE)
         *tokens = (*tokens)->next;
     return cmd;

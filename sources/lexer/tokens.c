@@ -36,6 +36,8 @@ static int tokenize_next(const char *input, int *i, t_token **token_list)
 {
     char *content = NULL;
     token_type type;
+    int is_single_quoted = 0;
+    int is_double_quoted = 0;
 
     if (ft_is_operator(input[*i]))
     {
@@ -43,7 +45,8 @@ static int tokenize_next(const char *input, int *i, t_token **token_list)
         if (!content)
             return -1;
         type = get_operation_type(content);
-        if (!ft_add_token(token_list, content, type)) {
+        if (!ft_add_token(token_list, content, type,0,0))
+		{
             free(content);
             return -1;
         }
@@ -51,10 +54,11 @@ static int tokenize_next(const char *input, int *i, t_token **token_list)
     }
     else
     {
-        content = read_word(input, i);
+        content = read_word(input, i, &is_single_quoted, &is_double_quoted);
         if (!content)
             return -1;
-        if (!ft_add_token(token_list, content, TOKEN_WORD)) {
+        if (!ft_add_token(token_list, content, TOKEN_WORD, is_double_quoted, is_single_quoted))
+		{
             free(content);
             return -1;
         }
