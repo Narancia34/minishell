@@ -79,10 +79,10 @@ t_token *tokenize(const char *input)
         if (!input[i])
             break;
         if (tokenize_next(input, &i, &token_list) < 0)
-        {
-            free_tokens(token_list);
-            return NULL;
-        }
+		{
+			free_tokens(token_list);
+			return NULL;
+		}
     }
     return token_list;
 }

@@ -64,7 +64,7 @@ void	add_heredoc_node(t_here_docs **here_docs, t_here_docs *new_n)
 	current->next = new_n;
 }
 
-char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *input, char **env, t_here_docs *here_docs)
+char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *input, char **env, t_here_docs *here_docs, t_command *tmp_c)
 {
 	char	*line;
 	char	*res;
@@ -107,7 +107,7 @@ char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *
 			ft_putstr_fd("couldnt open here-document\n", fd);
 			return (NULL);
 		}
-		expanded = expander_heredoc(res, env_list);
+		expanded = expand_env_vars(res, *exit_s, env_list, tmp_c->flag);
 		ft_putstr_fd(expanded, fd);
 		free(expanded);
 		free(res);
@@ -155,7 +155,7 @@ t_here_docs	*here_doc(t_command *input, int *exit_s, t_env *env_list, char	**env
 			if (ft_strcmp(tmp->args[i], "<<") == 0)
 			{
 				save_fd(2);
-				file_name = handle_here_doc(tmp->args[i+1], env_list, exit_s, input, env, here_docs);
+				file_name = handle_here_doc(tmp->args[i+1], env_list, exit_s, tmp, env, here_docs, tmp);
 				if (file_name == NULL)
 					return (NULL);
 				tmp_n = make_heredoc_node(file_name);

@@ -11,7 +11,8 @@
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-volatile sig_atomic_t g_signal_flag = 0;
+#include <stdio.h>
+#include <stdlib.h>
 
 void	free_tokens(t_token *head)
 {
@@ -81,6 +82,7 @@ void	save_fd(int flag)
 	}
 }
 
+
 int main(int ac, char **av, char **env)
 {
 	(void)av;
@@ -90,11 +92,10 @@ int main(int ac, char **av, char **env)
 	char	**u_env;
 	t_var    *var_list;
 	int		exit_s;
+	int	ret;
 	t_token *tokens;
 	t_command *commands;
-	int		ret;
 
-	save_fd(1);
 	exit_s = 0;
 	env_list = init_env(env);
 	var_list = NULL;
@@ -116,7 +117,11 @@ int main(int ac, char **av, char **env)
 		if (*input)
 			add_history(input);
 		tokens = tokenize(input);
-		free(input);
+		if (!tokens)
+		{
+			continue;
+			free(input);
+		}
 		expand_tokens(tokens, exit_s, env_list);
 		if (!validate_syntax(tokens))
 		{

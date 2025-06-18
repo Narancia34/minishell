@@ -110,26 +110,29 @@ static t_command *create_command(t_token **tokens)
     return cmd;
 }
 
-t_command	*build_commands(t_token *tokens)
+t_command *build_commands(t_token *tokens)
 {
-	t_command	*head = NULL;
-	t_command	*current = NULL;
-	t_command	*cmd;
+    t_command *head = NULL;
+    t_command *current = NULL;
+    t_command *cmd;
 
-	while (tokens)
-	{
-		cmd = create_command(&tokens);
-		if (!cmd) {
-			free_cmd(head);
-			return NULL;
-		}
-		if (!head)
-			head = cmd;
-		else
-			current->next = cmd;
-		current = cmd;
-	}
-	set_size(head);
-	set_type(head);
-	return head;
+    int flag = tokens ? tokens->flag : 1; // Default to 1 if tokens is NULL
+
+    while (tokens)
+    {
+        cmd = create_command(&tokens);
+        if (!cmd) {
+            free_cmd(head);
+            return NULL;
+        }
+        cmd->flag = flag; // Set flag for each command
+        if (!head)
+            head = cmd;
+        else
+            current->next = cmd;
+        current = cmd;
+    }
+    set_size(head);
+    set_type(head);
+    return head;
 }

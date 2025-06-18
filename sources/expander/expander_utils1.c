@@ -57,7 +57,7 @@ char	*append_character_as_is(const char **start, char *result)
 }
 
 
-char *expand_env_vars(char *input, int exit_status, t_env *env_list)
+char *expand_env_vars(char *input, int exit_status, t_env *env_list, int do_expand)
 {
     char    *result = NULL;
     const char  *start = input;
@@ -73,7 +73,7 @@ char *expand_env_vars(char *input, int exit_status, t_env *env_list)
                 quote = *start;
             result = append_character_as_is(&start, result);
         }
-        else if (quote != '\'' && *start == '$' && (is_valid_var_char(*(start + 1), true) || *(start + 1) == '?'))
+        else if (do_expand != 0 && quote != '\'' && *start == '$' && (is_valid_var_char(*(start + 1), true) || *(start + 1) == '?'))
         {
             if (*(start + 1) == '?')
                 handle_exit_status(exit_status, &result, &start);

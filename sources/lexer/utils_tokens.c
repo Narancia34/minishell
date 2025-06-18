@@ -75,23 +75,24 @@ static char *append_content(char *existing, const char *new_content, int len)
 
 static char *handle_quoted_section(const char *str, int *i, char *current_content)
 {
-    char *quoted;
-    char *new_content;
+	char *quoted;
+	char *new_content;
 
-    quoted = read_quoted((char *)str, i);
-    if (!quoted) {
-        free(current_content);
-        return NULL;
-    }
-
-    if (current_content) {
-        new_content = ft_strjoin(current_content, quoted);
-        free(current_content);
-        free(quoted);
-        return new_content;
-    } else {
-        return quoted;
-    }
+	quoted = read_quoted((char *)str, i);
+	if (!quoted)
+	{
+		free(current_content);
+		return NULL;
+	}
+	if (current_content)
+	{
+		new_content = ft_strjoin(current_content, quoted);
+		free(current_content);
+		free(quoted);
+		return new_content;
+	}
+	else
+		return quoted;
 }
 
 static char *handle_unquoted_section(const char *str, int *i, int *start, char *current_content)
@@ -99,10 +100,9 @@ static char *handle_unquoted_section(const char *str, int *i, int *start, char *
     while (str[*i] && !ft_whitespace(str[*i]) &&
            !ft_is_operator(str[*i]) &&
            str[*i] != '\'' && str[*i] != '"')
-    {
+	{
         (*i)++;
-    }
-
+	}
 	if (*i > *start)
 		return append_content(current_content, &str[*start], *i - *start);
 	else
@@ -118,24 +118,26 @@ char *read_word(const char *str, int *i, int *is_single_quoted, int *is_double_q
 
     while (str[*i] && !ft_whitespace(str[*i]) && !ft_is_operator(str[*i]))
     {
-        if (str[*i] == '\'') // Single quote
+        if (str[*i] == '\'')
         {
-            if (*i == start) *is_single_quoted = 1; // If quote at start, mark as single quoted
+            if (*i == start) *is_single_quoted = 1;
             content = handle_unquoted_section(str, i, &start, content);
             content = handle_quoted_section(str, i, content);
+			if (!content)
+				return NULL;
             start = *i;
         }
-        else if (str[*i] == '"') // Double quote
+        else if (str[*i] == '"')
         {
-            if (*i == start) *is_double_quoted = 1; // If quote at start, mark as double quoted
+            if (*i == start) *is_double_quoted = 1;
             content = handle_unquoted_section(str, i, &start, content);
             content = handle_quoted_section(str, i, content);
+			if (!content)
+				return NULL;
             start = *i;
         }
         else
-        {
             (*i)++;
-        }
     }
     content = handle_unquoted_section(str, i, &start, content);
     if (content)
