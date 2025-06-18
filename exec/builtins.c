@@ -54,22 +54,69 @@ int	ft_exit(char **arg)
 	return (ft_atoi(arg[1])  % 256);
 }
 
+/*void	change_pwd_env(char *old_dir, char *current_dir, t_env **env_list)*/
+/*{*/
+/*	t_env *current = *env_list;*/
+/*	while (current)*/
+/*	{*/
+/*		if (ft_strcmp(current->var_name, "OLDPWD") == 0)*/
+/*		{*/
+/*			free(current->var_value);*/
+/*			current->var_value = ft_strdup(old_dir);*/
+/*		}*/
+/*		else if (ft_strcmp(current->var_name, "PWD") == 0)*/
+/*		{*/
+/*			free(current->var_value);*/
+/*			current->var_value = ft_strdup(current_dir);*/
+/*		}*/
+/*		current = current->next;*/
+/*	}*/
+/*}*/
+
+t_env *new_node_from_kv(const char *name, const char *value)
+{
+	t_env *node = malloc(sizeof(t_env));
+	node->var_name = ft_strdup(name);
+	node->var_value = ft_strdup(value);
+	node->flag = 0;
+	node->exported = 1;
+	node->next = NULL;
+	node->prev = NULL;
+	return node;
+}
+
 void	change_pwd_env(char *old_dir, char *current_dir, t_env **env_list)
 {
 	t_env *current = *env_list;
+	int found_oldpwd = 0;
+	int found_pwd = 0;
+
 	while (current)
 	{
 		if (ft_strcmp(current->var_name, "OLDPWD") == 0)
 		{
 			free(current->var_value);
 			current->var_value = ft_strdup(old_dir);
+			found_oldpwd = 1;
 		}
 		else if (ft_strcmp(current->var_name, "PWD") == 0)
 		{
 			free(current->var_value);
 			current->var_value = ft_strdup(current_dir);
+			found_pwd = 1;
 		}
 		current = current->next;
+	}
+	// If not found, create nodes for missing vars
+	if (!found_oldpwd)
+	{
+		t_env *new_oldpwd = new_node_from_kv("OLDPWD", old_dir);
+		add_node(env_list, new_oldpwd);
+	}
+	if (!found_pwd)
+	{
+		t_env *new_pwd = new_node_from_kv("PWD", current_dir);
+		add_node(env_list, new_pwd);
 	}
 }
 

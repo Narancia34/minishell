@@ -29,7 +29,7 @@
 # include <sys/wait.h>
 # include "../libft/libft.h"
 
-extern volatile sig_atomic_t	g_signal_flag;
+static volatile sig_atomic_t	g_signal_flag = 0;
 
 typedef enum e_quote_type
 {
@@ -55,6 +55,7 @@ typedef struct s_token
 	token_type		type;
 	int is_single_quoted;
     int is_double_quoted;
+	int	flag;
 	struct s_token	*next;
 } t_token;
 
@@ -63,6 +64,7 @@ typedef struct s_command
 	char				**args;
 	token_type			type;
 	int					arg_size;
+	int					flag;
 	struct	s_command	*next;
 } t_command;
 
@@ -97,6 +99,7 @@ typedef struct s_pid
 	struct s_pid	*next;
 } t_pid;
 
+
 typedef struct s_here_docs
 {
 	char	*file_name;
@@ -112,9 +115,9 @@ void	free_tokens(t_token *head);
 
 //expander
 t_env	*find_env_var(t_env *env_list, const char *var_name);
-void expand_tokens(t_token *tokens, int exit_status, t_env *env_list);
 char	*strjoin_and_free(char *s1, char *s2);
-char	*expand_env_vars(char *input, int exit_status, t_env *env_list);
+void expand_tokens(t_token *tokens, int exit_status, t_env *env_list);
+char	*expand_env_vars(char *input, int exit_status, t_env *env_list, int do_expand);
 char	*remove_quotes(char *input);
 bool	is_variable_assignment(char *str);
 char	*get_var_list(t_var	*var_list, const char	*var_name);
@@ -144,7 +147,6 @@ bool	validate_syntax(t_token *tokens);
 int		handle_assignment(t_env **env_list, const char *assignment);
 void	print_commands(t_command *cmd);   // Optional for debug
 void	print_tokens(t_token *list);      // Optional for debug
-
 
 //execution part
 char	*find_cmd_path(char *full_cmd, char **envp);
