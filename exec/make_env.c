@@ -69,6 +69,30 @@ void free_split(char **split)
     free(split);
 }
 
+
+void set_env(t_env **env_list)
+{
+    char cwd[1024];
+    t_env *pwd_node;
+    t_env *shlvl_node;
+
+    if (getcwd(cwd, sizeof(cwd)) == NULL)
+        return ;
+
+    pwd_node = malloc(sizeof(t_env));
+    pwd_node->var_name = ft_strdup("PWD");
+    pwd_node->var_value = ft_strdup(cwd);
+    pwd_node->next = NULL;
+
+    shlvl_node = malloc(sizeof(t_env));
+    shlvl_node->var_name = ft_strdup("SHLVL");
+    shlvl_node->var_value = ft_strdup("0");
+    shlvl_node->next = NULL;
+
+    *env_list = pwd_node;
+    pwd_node->next = shlvl_node;
+}
+
 t_env	*init_env(char	**env)
 {
 	t_env	*env_list;
@@ -77,6 +101,11 @@ t_env	*init_env(char	**env)
 	int		i;
 
 	env_list = NULL;
+	if (!*env)
+	{
+		set_env(&env_list);
+		return (env_list);
+	}
 	i = 0;
 	while (env[i])
 	{
