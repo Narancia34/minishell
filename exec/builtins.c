@@ -107,7 +107,6 @@ void	change_pwd_env(char *old_dir, char *current_dir, t_env **env_list)
 		}
 		current = current->next;
 	}
-	// If not found, create nodes for missing vars
 	if (!found_oldpwd)
 	{
 		t_env *new_oldpwd = new_node_from_kv("OLDPWD", old_dir);

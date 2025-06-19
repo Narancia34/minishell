@@ -71,49 +71,146 @@ char	*cat_path_cmd(char *pre_path, char *full_cmd)
 	return (res);
 }
 
-char	*check_access(char **pre_paths, char *full_cmd)
+/*char	*check_access(char **pre_paths, char *full_cmd)*/
+/*{*/
+/*	int		i;*/
+/*	char	*res;*/
+/**/
+/*	i = 0;*/
+/*	while (pre_paths[i])*/
+/*	{*/
+/*		res = cat_path_cmd(pre_paths[i], full_cmd);*/
+/*		if (res && access(res, F_OK) == 0)*/
+/*			return (clean_up(NULL, pre_paths), res);*/
+/*		free(res);*/
+/*		i++;*/
+/*	}*/
+/*	return (NULL);*/
+/*}*/
+/**/
+/*char	*find_cmd_path(char *full_cmd, char **envp)*/
+/*{*/
+/*	char	*res;*/
+/*	char	*pre_path;*/
+/*	char	**pre_paths;*/
+/**/
+/*	if (!full_cmd || !*full_cmd)*/
+/*		return (NULL);*/
+/*	if (full_cmd[0] == '.' || full_cmd[0] == '/')*/
+/*	{*/
+/*		if (access(full_cmd, F_OK) == 0)*/
+/*			return (ft_strdup(full_cmd));*/
+/*		else*/
+/*			return (NULL);*/
+/*	}*/
+/*	if (!envp || !envp[0])*/
+/*		return (NULL);*/
+/*	pre_path = find_pre_path(envp);*/
+/*	if (!pre_path)*/
+/*		return (NULL);*/
+/*	pre_paths = ft_split(pre_path, ':');*/
+/*	free(pre_path);*/
+/*	if (!pre_paths)*/
+/*		return (NULL);*/
+/*	res = check_access(pre_paths, full_cmd);*/
+/*	if (!res || !*res)*/
+/*		return (clean_up(NULL, pre_paths), NULL);*/
+/*	return (res);*/
+/*}*/
+
+
+char	*check_access(char **pre_paths, char *full_cmd, int *exit_s)
 {
 	int		i;
 	char	*res;
+	struct stat	sb;
 
 	i = 0;
 	while (pre_paths[i])
 	{
 		res = cat_path_cmd(pre_paths[i], full_cmd);
-		if (res && access(res, F_OK) == 0)
-			return (clean_up(NULL, pre_paths), res);
+		if (res && stat(res, &sb) == 0)
+		{
+			if ((sb.st_mode & S_IXUSR) || (sb.st_mode & S_IXGRP) || (sb.st_mode & S_IXOTH))
+			{
+				clean_up(NULL, pre_paths);
+				*exit_s = 126;
+				return (res);
+			}
+		}
 		free(res);
 		i++;
 	}
+	printf("command not found\n");
+	*exit_s = 127;
+	clean_up(NULL, pre_paths);
 	return (NULL);
 }
 
-char	*find_cmd_path(char *full_cmd, char **envp)
+char	*find_cmd_path(char *full_cmd, char **envp, int *exit_s)
 {
 	char	*res;
 	char	*pre_path;
 	char	**pre_paths;
+	struct stat sb;
 
 	if (!full_cmd || !*full_cmd)
 		return (NULL);
 	if (full_cmd[0] == '.' || full_cmd[0] == '/')
 	{
-		if (access(full_cmd, F_OK) == 0)
-			return (ft_strdup(full_cmd));
+		if (stat(full_cmd, &sb) == 0)
+		{
+			if (S_ISDIR(sb.st_mode))
+			{
+				fprintf(stderr, "minishell: %s: Is a directory\n", full_cmd);
+				*exit_s = 126;
+				return (NULL);
+			}
+			if ((sb.st_mode & S_IXUSR) || (sb.st_mode & S_IXGRP) || (sb.st_mode & S_IXOTH))
+				return (ft_strdup(full_cmd));
+			else
+			{
+				fprintf(stderr, "minishell: %s: Permission denied\n", full_cmd);
+				*exit_s = 126;
+				return (NULL);
+			}
+		}
 		else
 			return (NULL);
 	}
+	if (stat(full_cmd, &sb) == 0)
+	{
+		if (S_ISDIR(sb.st_mode))
+		{
+			fprintf(stderr, "minishell: %s: Is a directoy\n", full_cmd);
+			*exit_s = 126;
+			return (NULL);
+		}
+		if ((sb.st_mode & S_IXUSR) || (sb.st_mode & S_IXGRP) || (sb.st_mode & S_IXOTH))
+			return (ft_strdup(full_cmd));
+		else
+		{
+			fprintf(stderr, "minishell: %s: Permission denied\n", full_cmd);
+			*exit_s = 126;
+			return (NULL);
+		}
+	}
 	if (!envp || !envp[0])
+	{
+		*exit_s = 127;
 		return (NULL);
+	}
 	pre_path = find_pre_path(envp);
 	if (!pre_path)
+	{
+		*exit_s = 127;
+		printf("command not found\n");
 		return (NULL);
+	}
 	pre_paths = ft_split(pre_path, ':');
 	free(pre_path);
 	if (!pre_paths)
 		return (NULL);
-	res = check_access(pre_paths, full_cmd);
-	if (!res || !*res)
-		return (clean_up(NULL, pre_paths), NULL);
+	res = check_access(pre_paths, full_cmd, exit_s);
 	return (res);
 }

@@ -16,17 +16,17 @@
 
 void	handle_exec(char *path, char **args, char **envp, t_env **env_list, t_command *input, t_pid *pid_list)
 {
-	if (!path)
-	{
-		ft_putstr_fd("command not found\n", 2);
-		free_commands(input);
-		clean_up(path, args);
-		clean_up(NULL, envp);
-		free_env(env_list);
-		if (pid_list)
-			free_pids(pid_list);
-		exit(127);
-	}
+	/*if (!path)*/
+	/*{*/
+		/*ft_putstr_fd("command not found\n", 2);*/
+	/*	free_commands(input);*/
+	/*	clean_up(path, args);*/
+	/*	clean_up(NULL, envp);*/
+	/*	free_env(env_list);*/
+	/*	if (pid_list)*/
+	/*		free_pids(pid_list);*/
+	/*	exit(127);*/
+	/*}*/
 	if (execve(path, args, envp) == -1)
 	{
 		perror("failed to execute command");
@@ -64,7 +64,15 @@ void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s
 			exit(EXIT_FAILURE);
 		}
 		free_here_docs(here_docs);
-		cmd_path = find_cmd_path(args[0], envp);
+		cmd_path = find_cmd_path(args[0], envp, exit_s);
+		if (!cmd_path)
+		{
+			free_commands(input);
+			clean_up(cmd_path, args);
+			clean_up(NULL, envp);
+			free_env(env_list);
+			exit(*exit_s);
+		}
 		handle_exec(cmd_path, args, envp, env_list, input, NULL);
 	}
 	else
@@ -92,7 +100,7 @@ void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s
 	}
 }
 
-void	exec_piped_cmd(char **args, char **envp, char **o_args, t_env **env_list, t_command *input, t_pid *pid_list, t_here_docs *here_docs)
+void	exec_piped_cmd(char **args, char **envp, char **o_args, t_env **env_list, t_command *input, t_pid *pid_list, t_here_docs *here_docs, int *exit_s)
 {
 	char	*cmd_path;
 
@@ -106,6 +114,16 @@ void	exec_piped_cmd(char **args, char **envp, char **o_args, t_env **env_list, t
 		exit(EXIT_FAILURE);
 	}
 	free_here_docs(here_docs);
-	cmd_path = find_cmd_path(args[0], envp);
+	cmd_path = find_cmd_path(args[0], envp, exit_s);
+	if (!cmd_path)
+	{
+		free_commands(input);
+		clean_up(NULL, args);
+		clean_up(NULL, envp);
+		free_env(env_list);
+		if (pid_list)
+			free_pids(pid_list);
+		exit(*exit_s);
+	}
 	handle_exec(cmd_path, args, envp, env_list, input, pid_list);
 }

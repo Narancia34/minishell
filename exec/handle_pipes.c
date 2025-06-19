@@ -101,7 +101,7 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 			if (is_builtin(args[0]) == 1)
 				exec_builtin(args, env_list, tmp->args, exit_s, here_docs);
 			else
-				exec_piped_cmd(args, envp, tmp->args, env_list, input, pid_list, here_docs_head);
+				exec_piped_cmd(args, envp, tmp->args, env_list, input, pid_list, here_docs_head, exit_s);
 			clean_up(NULL, args);
 			clean_up(NULL, envp);
 			free_commands(input);

@@ -87,11 +87,6 @@ typedef struct s_var
 	struct s_var	*next;
 } t_var;
 
-typedef struct s_shell
-{
-	t_env	*env_list;
-	t_var	*var_list;
-} t_shell;
 
 typedef struct s_pid
 {
@@ -105,6 +100,14 @@ typedef struct s_here_docs
 	char	*file_name;
 	struct s_here_docs	*next;
 } t_here_docs;
+
+typedef struct s_shell
+{
+	t_command	*input;
+	t_env	*env_list;
+	t_pid	*pid_list;
+	t_here_docs	*here_docs;
+} t_shell;
 
 void check_and_set_assignment(t_token *token);
 // init env in a stack
@@ -149,9 +152,9 @@ void	print_commands(t_command *cmd);   // Optional for debug
 void	print_tokens(t_token *list);      // Optional for debug
 
 //execution part
-char	*find_cmd_path(char *full_cmd, char **envp);
+char	*find_cmd_path(char *full_cmd, char **envp, int *exit_s);
 void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s, t_env **env_list, t_command *input, t_here_docs *here_docs);
-void	exec_piped_cmd(char **args, char **envp, char **o_args, t_env **env_list, t_command *input, t_pid *pid_list, t_here_docs *here_docs);
+void	exec_piped_cmd(char **args, char **envp, char **o_args, t_env **env_list, t_command *input, t_pid *pid_list, t_here_docs *here_docs, int *exit_s);
 int	check_input(t_command *input, t_env **env_list, char **envp, int *exit_s);
 int	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s, t_here_docs *here_docs);
 int	is_builtin(char *arg);
