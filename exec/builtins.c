@@ -54,167 +54,133 @@ int	ft_exit(char **arg)
 	return (ft_atoi(arg[1])  % 256);
 }
 
-/*void	change_pwd_env(char *old_dir, char *current_dir, t_env **env_list)*/
-/*{*/
-/*	t_env *current = *env_list;*/
-/*	while (current)*/
-/*	{*/
-/*		if (ft_strcmp(current->var_name, "OLDPWD") == 0)*/
-/*		{*/
-/*			free(current->var_value);*/
-/*			current->var_value = ft_strdup(old_dir);*/
-/*		}*/
-/*		else if (ft_strcmp(current->var_name, "PWD") == 0)*/
-/*		{*/
-/*			free(current->var_value);*/
-/*			current->var_value = ft_strdup(current_dir);*/
-/*		}*/
-/*		current = current->next;*/
-/*	}*/
-/*}*/
-
 t_env *new_node_from_kv(const char *name, const char *value)
 {
-	t_env *node = malloc(sizeof(t_env));
+	t_env *node;
+
+	node = malloc(sizeof(t_env));
 	node->var_name = ft_strdup(name);
 	node->var_value = ft_strdup(value);
 	node->flag = 0;
 	node->exported = 1;
 	node->next = NULL;
 	node->prev = NULL;
-	return node;
+	return (node);
+}
+
+void	set_pwd_env(t_env **env_list, char *old_dir, char *current_dir, t_pwd *pwd)
+{
+	t_env	*new_oldpwd;
+	t_env	*new_pwd;
+
+	if (!pwd->oldpwd)
+	{
+		new_oldpwd = new_node_from_kv("OLDPWD", old_dir);
+		add_node(env_list, new_oldpwd);
+	}
+	if (!pwd->pwd)
+	{
+		new_pwd = new_node_from_kv("PWD", current_dir);
+		add_node(env_list, new_pwd);
+	}
 }
 
 void	change_pwd_env(char *old_dir, char *current_dir, t_env **env_list)
 {
-	t_env *current = *env_list;
-	int found_oldpwd = 0;
-	int found_pwd = 0;
+	t_env *current;
+	t_pwd *pwd;
 
+	pwd = malloc(sizeof(t_pwd));
+	pwd->pwd = 0;
+	pwd->oldpwd = 0;
+	current = *env_list;
 	while (current)
 	{
 		if (ft_strcmp(current->var_name, "OLDPWD") == 0)
 		{
 			free(current->var_value);
 			current->var_value = ft_strdup(old_dir);
-			found_oldpwd = 1;
+			pwd->oldpwd = 1;
 		}
 		else if (ft_strcmp(current->var_name, "PWD") == 0)
 		{
 			free(current->var_value);
 			current->var_value = ft_strdup(current_dir);
-			found_pwd = 1;
+			pwd->pwd = 1;
 		}
 		current = current->next;
 	}
-	if (!found_oldpwd)
+	set_pwd_env(env_list, old_dir, current_dir, pwd);
+	free(pwd);
+}
+
+int	cd_home(t_env *env_list)
+{
+	t_env	*tmp;
+	char	*path;
+
+	path = NULL;
+	tmp = env_list;
+	while (tmp)
 	{
-		t_env *new_oldpwd = new_node_from_kv("OLDPWD", old_dir);
-		add_node(env_list, new_oldpwd);
+		if (ft_strcmp("HOME", tmp->var_name) == 0)
+		{
+			path = ft_strdup(tmp->var_value);
+			break;
+		}
+		tmp = tmp->next;
 	}
-	if (!found_pwd)
+	if (!path)
 	{
-		t_env *new_pwd = new_node_from_kv("PWD", current_dir);
-		add_node(env_list, new_pwd);
+		ft_putstr_fd("minishell: cd: HOME not set\n", 2);
+		return (1);
 	}
+	if (chdir(path) != 0)
+	{
+		perror("minishell: cd: error\n");
+		free(path);
+		return (1);
+	}
+	free(path);
+	return (0);
+}
+
+int	cd_path(char *path)
+{
+	if (chdir(path) != 0)
+	{
+		perror("minishell: cd: error\n");
+		return (1);
+	}
+	return (0);
 }
 
 int	ft_cd(char **arg, t_env **env_list)
 {
 	char	current_dir[1024];
 	char	old_dir[1024];
-	char	*path = NULL;
-	t_env	*tmp;
-	int		should_free = 0;
+	char	*path;
 
+	path = NULL;
 	getcwd(old_dir, sizeof(old_dir));
 	if (arg[1] == NULL)
 	{
-		tmp = *env_list;
-		while (tmp)
-		{
-			if (ft_strcmp("HOME", tmp->var_name) == 0)
-			{
-				path = ft_strdup(tmp->var_value);
-				should_free = 1;
-				break ;
-			}
-			tmp = tmp->next;
-		}
-		if (!path)
-		{
-			printf("minishell: cd: HOME not set\n");
-			return 1;
-		}
+		if (cd_home(*env_list) == 1)
+			return (1);
 	}
 	else
 	{
-		path = arg[1];
-		should_free = 0;
+		if (cd_path(arg[1]) == 1)
+			return (1);
 	}
-	if (chdir(path) != 0)
-	{
-		fprintf(stderr, "minishell: cd: %s: %s\n", path, strerror(errno));
-		if (should_free)
-			free(path);
-		return 1;
-	}
-	if (should_free)
-		free(path);
 	if (getcwd(current_dir, sizeof(current_dir)) == NULL)
 	{
 		perror("minishell: cd: getcwd error");
 		return 1;
 	}
 	change_pwd_env(old_dir, current_dir, env_list);
-	return 0;
+	return (0);
 }
-
-/*int	ft_cd(char **arg, t_env **env_list)*/
-/*{*/
-/*	char	current_dir[1024];*/
-/*	char	old_dir[1024];*/
-/*	char	*path;*/
-/*	t_env	*tmp;*/
-/**/
-/*	getcwd(old_dir, sizeof(old_dir));*/
-/*	path = ft_strdup("");*/
-/*	if (arg[1] == NULL)*/
-/*	{*/
-/*		tmp = *env_list;*/
-/*		while (tmp)*/
-/*		{*/
-/*			if (ft_strcmp("HOME", tmp->var_name) == 0)*/
-/*			{*/
-/*				path = ft_strdup(tmp->var_value);*/
-/*				break ;*/
-/*			}*/
-/*			tmp = tmp->next;*/
-/*		}*/
-/*		if (!path[0])*/
-/*		{*/
-/*			printf("minishell: cd: HOME not set\n");*/
-/*			free(path);*/
-/*			return 1;*/
-/*		}*/
-/*	}*/
-/*	else*/
-/*		path = arg[1];*/
-/*	if (chdir(path) != 0)*/
-/*	{*/
-/*		fprintf(stderr, "minishell: cd: %s: %s\n", path, strerror(errno));*/
-/*		free(path);*/
-/*		return 1;*/
-/*	}*/
-/*	free(path);*/
-/*	if (getcwd(current_dir, sizeof(current_dir)) == NULL)*/
-/*	{*/
-/*		perror("minishell: cd: getcwd error");*/
-/*		return 1;*/
-/*	}*/
-/*	change_pwd_env(old_dir, current_dir, env_list);*/
-/*	return 0;*/
-/*}*/
 
 int	ft_echo(char **arg)
 {

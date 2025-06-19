@@ -94,6 +94,11 @@ typedef struct s_pid
 	struct s_pid	*next;
 } t_pid;
 
+typedef struct s_pwd
+{
+	int	pwd;
+	int	oldpwd;
+} t_pwd;
 
 typedef struct s_here_docs
 {
