@@ -82,37 +82,6 @@ void	save_fd(int flag)
 	}
 }
 
-void	protect_pwd_var(t_env **env_list)
-{
-	t_env	*current;
-
-	current = *env_list;
-	while (current)
-	{
-		if (ft_strcmp(current->var_name, "PWD") == 0)
-		{
-			free(current->var_value);
-			current->var_value = ft_strdup("/");
-		}
-		current = current->next;
-	}
-}
-
-void	protect_cwd(t_env **env_list)
-{
-	char	*tmp;
-
-	tmp = getcwd(NULL, 0);
-	if (!tmp && errno == ENOENT)
-	{
-		chdir("/");
-		protect_pwd_var(env_list);
-		printf("getcwd: cannot access parent directories: ");
-		printf("No such file or directory\n");
-	}
-	free(tmp);
-}
-
 
 int main(int ac, char **av, char **env)
 {
@@ -135,11 +104,9 @@ int main(int ac, char **av, char **env)
 	while (1)
 	{
 		g_signal_flag = 0;
-		protect_cwd(&env_list);
 		input = readline("minishell$ ");
 		if (g_signal_flag == SIGINT)
 		{
-			exit_s = 130;
 		}
 		if (!input)
 		{
@@ -151,9 +118,10 @@ int main(int ac, char **av, char **env)
 		tokens = tokenize(input);
 		if (!tokens)
 		{
-			continue;
 			free(input);
+			continue;
 		}
+		free(input);
 		expand_tokens(tokens, exit_s, env_list);
 		if (!validate_syntax(tokens))
 		{

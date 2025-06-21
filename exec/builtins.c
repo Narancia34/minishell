@@ -33,7 +33,7 @@ int	is_digits(char	*arg)
 
 int	ft_exit(char **arg)
 {
-	int status;
+	int	status;
 
 	if (!arg[1])
 	{
@@ -182,16 +182,34 @@ int	ft_cd(char **arg, t_env **env_list)
 	return (0);
 }
 
+void	print_arg(char **arg, int i)
+{
+	int	first;
+	int	j;
+
+	j = i;
+	first = 1;
+	while (arg[j])
+	{
+		if (!first)
+			printf(" ");
+		printf("%s", arg[j]);
+		first = 0;
+		j++;
+	}
+}
+
 int	ft_echo(char **arg)
 {
 	int	i;
+	int	j;
 	int	print_newline;
 
 	i = 1;
 	print_newline = 1;
 	while (arg[i] && arg[i][0] == '-' && arg[i][1] == 'n')
 	{
-		int	j = 2;
+		j = 2;
 		while (arg[i][j] == 'n')
 			j++;
 		if (arg[i][j] != '\0')
@@ -199,15 +217,7 @@ int	ft_echo(char **arg)
 		print_newline = 0;
 		i++;
 	}
-	int	first = 1;
-	while (arg[i])
-	{
-		if (!first)
-			printf(" ");
-		printf("%s", arg[i]);
-		first = 0;
-		i++;
-	}
+	print_arg(arg, i);
 	if (print_newline)
 		printf("\n");
 	return (0);
@@ -244,8 +254,9 @@ int	ft_env(t_env *env_list)
 
 void remove_env_var(t_env **env_list, char *var_name)
 {
-	t_env *current = *env_list;
+	t_env *current;
 
+	current = *env_list;
 	while (current)
 	{
 		if (ft_strcmp(current->var_name, var_name) == 0)
@@ -280,19 +291,24 @@ int	ft_unset(char **args, t_env **env_list)
 	return (0);
 }
 
-int	print_export(t_env	*env_list)
+void	switch_value(char **tmp, char **arg, char **min_arg)
+{
+	*tmp = *arg;
+	*arg = *min_arg;
+	*min_arg = *tmp;
+}
+
+char	**sort_env(t_env *env_list, int count)
 {
 	char	**res;
 	char	*tmp;
 	int		i;
 	int		j;
-	int		count;
 	int		min_index;
 
 	res = upd_env(env_list);
 	if (!res)
-		return (1);
-	count = lstlen(env_list);
+		return (NULL);
 	i = 0;
 	while (i < count - 1)
 	{
@@ -305,17 +321,24 @@ int	print_export(t_env	*env_list)
 			j++;
 		}
 		if (min_index != i)
-		{
-			tmp = res[i];
-			res[i] = res[min_index];
-			res[min_index] = tmp;
-		}
+			switch_value(&tmp, &res[i], &res[min_index]);
 		i++;
 	}
+	return (res);
+}
+
+int	print_export(t_env *env_list)
+{
+	char	**res;
+	int		i;
+	int		count;
+
+	count = lstlen(env_list);
+	res = sort_env(env_list, count);
 	i = 0;
 	while (i < count)
 	{
-		printf("declare -x %s\n", res[i]);
+		printf("%s\n", res[i]);
 		free(res[i]);
 		i++;
 	}

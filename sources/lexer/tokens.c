@@ -12,77 +12,71 @@
 
 #include "../../includes/minishell.h"
 
-char *read_quoted(const char *input, int *i)
+char	*read_quoted(const char *input, int *i)
 {
-    char    quote;
-    int     start;
-    char    *content;
+	char	quote;
+	int		start;
+	char	*content;
 
-    quote = input[*i];
-    start = ++(*i);
-    while (input[*i] && input[*i] != quote)
-        (*i)++;
-    if (input[*i] != quote)
-    {
-        ft_putstr_fd("minishell: syntax error: unclosed quote\n", STDERR_FILENO);
-        return NULL;
-    }
-    content = strndup(&input[start], *i - start);
-    (*i)++;
-    return content;
+	quote = input[*i];
+	start = ++(*i);
+	while (input[*i] && input[*i] != quote)
+		(*i)++;
+	if (input[*i] != quote)
+		return (ft_putstr_fd("minishell: syntax error: unclosed quote\n", \
+				STDERR_FILENO), NULL);
+	content = ft_strndup(&input[start], *i - start);
+	(*i)++;
+	return (content);
 }
 
-static int tokenize_next(const char *input, int *i, t_token **token_list)
+static	int	tokenize_next(const char *input, int *i, t_token **token_list)
 {
-    char *content = NULL;
-    token_type type;
-    int is_single_quoted = 0;
-    int is_double_quoted = 0;
+	char		*content;
+	token_type	type;
+	int			quote[2];
 
-    if (ft_is_operator(input[*i]))
-    {
-        content = read_operator(input, i);
-        if (!content)
-            return -1;
-        type = get_operation_type(content);
-        if (!ft_add_token(token_list, content, type,0,0))
-		{
-            free(content);
-            return -1;
-        }
-        free(content);
-    }
-    else
-    {
-        content = read_word(input, i, &is_single_quoted, &is_double_quoted);
-        if (!content)
-            return -1;
-        if (!ft_add_token(token_list, content, TOKEN_WORD, is_double_quoted, is_single_quoted))
-		{
-            free(content);
-            return -1;
-        }
-        free(content);
-    }
-    return 0;
+	quote[0] = 0;
+	quote[1] = 0;
+	content = NULL;
+	if (ft_is_operator(input[*i]))
+	{
+		content = read_operator(input, i);
+		if (!content)
+			return (-1);
+		type = get_operation_type(content);
+		if (!ft_add_token(token_list, content, type, quote))
+			return (free(content), -1);
+	}
+	else
+	{
+		content = read_word(input, i, quote);
+		if (!content)
+			return (-1);
+		if (!ft_add_token(token_list, content, TOKEN_WORD, quote))
+			return (free(content), -1);
+	}
+	return (free(content), 0);
 }
 
-t_token *tokenize(const char *input)
+t_token	*tokenize(const char *input)
 {
-    t_token *token_list = NULL;
-    int i = 0;
+	t_token	*token_list;
+	int		i;
 
-    while (input[i])
-    {
-        while (input[i] && ft_whitespace(input[i]))
-            i++;
-        if (!input[i])
-            break;
-        if (tokenize_next(input, &i, &token_list) < 0)
+	token_list = NULL;
+	i = 0;
+	while (input[i])
+	{
+		while (input[i] && ft_whitespace(input[i]))
+			i++;
+		if (!input[i])
+			break ;
+		if (tokenize_next(input, &i, &token_list) < 0)
 		{
 			free_tokens(token_list);
-			return NULL;
+			return (NULL);
 		}
-    }
-    return token_list;
+	}
+	return (token_list);
 }

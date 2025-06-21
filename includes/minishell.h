@@ -87,6 +87,11 @@ typedef struct s_var
 	struct s_var	*next;
 } t_var;
 
+typedef struct s_shell
+{
+	t_env	*env_list;
+	t_var	*var_list;
+} t_shell;
 
 typedef struct s_pid
 {
@@ -94,25 +99,12 @@ typedef struct s_pid
 	struct s_pid	*next;
 } t_pid;
 
-typedef struct s_pwd
-{
-	int	pwd;
-	int	oldpwd;
-} t_pwd;
 
 typedef struct s_here_docs
 {
 	char	*file_name;
 	struct s_here_docs	*next;
 } t_here_docs;
-
-typedef struct s_shell
-{
-	t_command	*input;
-	t_env	*env_list;
-	t_pid	*pid_list;
-	t_here_docs	*here_docs;
-} t_shell;
 
 void check_and_set_assignment(t_token *token);
 // init env in a stack
@@ -137,7 +129,7 @@ char	*expand_tilde(char *input);
 char	*get_env_value(t_env *env_list, const char *var_name);
 
 //tokens
-t_token *ft_add_token(t_token **token_list, char *value, token_type type, int double_quote, int single_qoute);
+t_token *ft_add_token(t_token **token_list, char *value, token_type type, int *quote);
 t_token	*tokenize(const char *input);
 t_command	*build_commands(t_token *tokens);
 void	set_size(t_command *head);
@@ -145,7 +137,7 @@ void	set_type(t_command *head);
 char *read_quoted(const char *input, int *i);
 char	**ft_realloc(char *arg, char **old_arr);
 char *read_operator(const char *str, int *i);
-char *read_word(const char *str, int *i, int *is_single_quoted, int *is_double_quoted);
+char *read_word(const char *str, int *i, int *quote);
 token_type	get_operation_type(const char *op);
 
 //check syntax
@@ -157,9 +149,9 @@ void	print_commands(t_command *cmd);   // Optional for debug
 void	print_tokens(t_token *list);      // Optional for debug
 
 //execution part
-char	*find_cmd_path(char *full_cmd, char **envp, int *exit_s);
+char	*find_cmd_path(char *full_cmd, char **envp);
 void	exec_cmd(char **args, char **envp, char **o_args, int has_pipe, int *exit_s, t_env **env_list, t_command *input, t_here_docs *here_docs);
-void	exec_piped_cmd(char **args, char **envp, char **o_args, t_env **env_list, t_command *input, t_pid *pid_list, t_here_docs *here_docs, int *exit_s);
+void	exec_piped_cmd(char **args, char **envp, char **o_args, t_env **env_list, t_command *input, t_pid *pid_list, t_here_docs *here_docs);
 int	check_input(t_command *input, t_env **env_list, char **envp, int *exit_s);
 int	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s, t_here_docs *here_docs);
 int	is_builtin(char *arg);

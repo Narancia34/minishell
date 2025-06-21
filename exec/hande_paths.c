@@ -134,7 +134,7 @@ char	*check_access(char **pre_paths, char *full_cmd, int *exit_s)
 			if ((sb.st_mode & S_IXUSR) || (sb.st_mode & S_IXGRP) || (sb.st_mode & S_IXOTH))
 			{
 				clean_up(NULL, pre_paths);
-				*exit_s = 126;
+				*exit_s = 0;
 				return (res);
 			}
 		}

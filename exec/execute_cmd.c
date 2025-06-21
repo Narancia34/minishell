@@ -16,17 +16,6 @@
 
 void	handle_exec(char *path, char **args, char **envp, t_env **env_list, t_command *input, t_pid *pid_list)
 {
-	/*if (!path)*/
-	/*{*/
-		/*ft_putstr_fd("command not found\n", 2);*/
-	/*	free_commands(input);*/
-	/*	clean_up(path, args);*/
-	/*	clean_up(NULL, envp);*/
-	/*	free_env(env_list);*/
-	/*	if (pid_list)*/
-	/*		free_pids(pid_list);*/
-	/*	exit(127);*/
-	/*}*/
 	if (execve(path, args, envp) == -1)
 	{
 		perror("failed to execute command");
