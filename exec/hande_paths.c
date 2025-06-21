@@ -176,7 +176,11 @@ char	*find_cmd_path(char *full_cmd, char **envp, int *exit_s)
 			}
 		}
 		else
+	{
+			ft_putstr_fd("no such file or directory\n", 2);
+			*exit_s = 127;
 			return (NULL);
+		}
 	}
 	if (stat(full_cmd, &sb) == 0)
 	{

@@ -29,7 +29,7 @@
 # include <sys/wait.h>
 # include "../libft/libft.h"
 
-static volatile sig_atomic_t	g_signal_flag = 0;
+extern volatile sig_atomic_t	g_signal_flag;
 
 typedef enum e_quote_type
 {

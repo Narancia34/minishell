@@ -11,8 +11,7 @@
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
-#include <stdio.h>
-#include <stdlib.h>
+volatile sig_atomic_t g_signal_flag = 0;
 
 void	free_tokens(t_token *head)
 {
@@ -106,8 +105,7 @@ int main(int ac, char **av, char **env)
 		g_signal_flag = 0;
 		input = readline("minishell$ ");
 		if (g_signal_flag == SIGINT)
-		{
-		}
+			exit_s = 130;
 		if (!input)
 		{
 			write(STDOUT_FILENO, "exit\n", 5);
