@@ -66,12 +66,12 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 	int	count;
 	t_here_docs	*here_docs_head;
 
-	here_docs_head = here_docs;
 	prev_fd = -1;
 	tmp = input;
 	pid_list = NULL;
 	while (tmp)
 	{
+		here_docs_head = here_docs;
 		if (tmp->next && pipe(fd) == -1)
 		{
 			perror("pipe failed\n");
