@@ -14,8 +14,11 @@
 
 int	has_pipe(t_command *input)
 {
-	t_command *tmp = input;
-	int res = 0;
+	t_command	*tmp;
+	int		res;
+
+	tmp = input;
+	res = 0;
 	while (tmp)
 	{
 		tmp = tmp->next;
@@ -24,41 +27,60 @@ int	has_pipe(t_command *input)
 	return (res);
 }
 
-char	**get_cmd(char **o_args)
+typedef struct s_red
 {
 	char	**args;
 	int		i;
 	int		j;
 	int		red;
+}	t_red;
+
+int	innit_args(t_red *red, char **o_args)
+{
+	red->i = 0;
+	red->red = 0;
+	while (o_args[red->i])
+	{
+		if (ft_strcmp(o_args[red->i], ">") == 0
+			|| ft_strcmp(o_args[red->i], "<") == 0
+			|| ft_strcmp(o_args[red->i], ">>") == 0
+			|| ft_strcmp(o_args[red->i], "<<") == 0)
+			red->red += 2;
+		red->i++;
+	}
+	red->args = malloc((red->i - red->red + 1) * sizeof(char *));
+	if (!red->args)
+		return (1);
+	return (0);
+}
+
+char	**get_cmd(char **o_args)
+{
+	t_red	red;
 
 	if (!o_args)
 		return (NULL);
-	i = 0;
-	red = 0;
-	while (o_args[i])
-	{
-		if (ft_strcmp(o_args[i], ">") == 0 || ft_strcmp(o_args[i], "<") == 0 || ft_strcmp(o_args[i], ">>") == 0 || ft_strcmp(o_args[i], "<<") == 0)
-			red += 2;
-		i++;
-	}
-	args = malloc((i - red + 1) * sizeof(char *));
-	if (!args)
+	if (innit_args(&red, o_args) == 1)
 		return (NULL);
-	i = 0;
-	j = 0;
-	while (o_args[i])
+	red.i = 0;
+	red.j = 0;
+	while (o_args[red.i])
 	{
-		if ((ft_strcmp(o_args[i], ">") == 0 || ft_strcmp(o_args[i], "<") == 0 || ft_strcmp(o_args[i], ">>") == 0 || ft_strcmp(o_args[i], "<<") == 0) && o_args[i+1])
-			i++;
+		if ((ft_strcmp(o_args[red.i], ">") == 0
+				|| ft_strcmp(o_args[red.i], "<") == 0
+				|| ft_strcmp(o_args[red.i], ">>") == 0
+				|| ft_strcmp(o_args[red.i], "<<") == 0)
+			&& o_args[red.i + 1])
+			red.i++;
 		else
 		{
-			args[j] = ft_strdup(o_args[i]);
-			j++;
+			red.args[red.j] = ft_strdup(o_args[red.i]);
+			red.j++;
 		}
-		i++;
+		red.i++;
 	}
-	args[j] = NULL;
-	return (args);
+	red.args[red.j] = NULL;
+	return (red.args);
 }
 
 int	has_heredoc(t_command *input)
@@ -81,50 +103,65 @@ int	has_heredoc(t_command *input)
 	return (1);
 }
 
-int	check_input(t_command *input, t_env **env_list, char **envp, int *exit_s)
+typedef struct s_check
 {
 	t_command	*tmp;
 	char	**args;
 	t_here_docs	*here_docs;
 	int		ret;
+}	t_check;
 
-	here_docs = here_doc(input, exit_s, *env_list, envp);
-	if (has_heredoc(input) == 0 && !here_docs)
+int	check_heredoc(t_check *check, t_command *input, int *exit_s, t_env *env_list, char **envp)
+{
+	check->here_docs = here_doc(input, exit_s, env_list, envp);
+	if (has_heredoc(input) == 0 && !check->here_docs)
 	{
-		free_here_docs(here_docs);
-		return (257);
+		free_here_docs(check->here_docs);
+		return (1);
 	}
-	if (has_pipe(input) > 1)
-		handle_pipeline(input, env_list, envp, exit_s, here_docs);
-	else
+	return (0);
+}
+
+int	exec_input(t_check *check, t_command *input, t_env **env_list, char **envp, int	*exit_s)
+{
+	if (is_builtin(check->args[0]) == 1)
 	{
-		tmp = input;
-		while (tmp)
+		check->ret = exec_builtin(check->args, env_list, check->tmp->args, exit_s, check->here_docs);
+		if (check->ret != 257)
 		{
-			args = get_cmd(tmp->args);
-			if (!args)
-			{
-				ft_putstr_fd("minishell: error parsing command\n", 2);
-				tmp = tmp->next;
-				continue;
-			}
-			else if (is_builtin(args[0]) == 1)
-			{
-				ret = exec_builtin(args, env_list, tmp->args, exit_s, here_docs);
-				if (ret != 257)
-				{
-					free_here_docs(here_docs);
-					clean_up(NULL, args);
-					return (ret);
-				}
-			}
-			else
-				exec_cmd(args, envp, tmp->args, 0, exit_s, env_list, input, here_docs);
-			clean_up(NULL, args);
-			tmp = tmp->next;
+			free_here_docs(check->here_docs);
+			clean_up(NULL, check->args);
+			return (check->ret);
 		}
 	}
-	if (here_docs)
-		free_here_docs(here_docs);
+	else
+		exec_cmd(check->args, envp, check->tmp->args, 0, exit_s, env_list, input, check->here_docs);
+	clean_up(NULL, check->args);
+	return (257);
+}
+
+int	check_input(t_command *input, t_env **env_list, char **envp, int *exit_s)
+{
+	t_check	check;
+	int		ret;
+	
+	if (check_heredoc(&check, input, exit_s, *env_list, envp) == 1)
+		return (257);
+	if (has_pipe(input) > 1)
+		handle_pipeline(input, env_list, envp, exit_s, check.here_docs);
+	else
+	{
+		check.tmp = input;
+		while (check.tmp)
+		{
+			check.args = get_cmd(check.tmp->args);
+			ret = exec_input(&check, input, env_list, envp, exit_s);
+			if (ret != 257)
+				return (ret);
+			check.tmp = check.tmp->next;
+		}
+	}
+	if (check.here_docs)
+		free_here_docs(check.here_docs);
 	return (257);
 }
