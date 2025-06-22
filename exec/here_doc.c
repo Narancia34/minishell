@@ -104,7 +104,7 @@ char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *
 		fd = open(file_name, O_WRONLY | O_CREAT | O_TRUNC, 0644);
 		if (fd == -1)
 		{
-			ft_putstr_fd("couldnt open here-document\n", fd);
+			perror("open()");
 			return (NULL);
 		}
 		expanded = expand_env_vars(res, *exit_s, env_list, tmp_c->flag);
@@ -112,7 +112,6 @@ char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *
 		free(expanded);
 		free(res);
 		close(fd);
-		(void)env;
 		free_env(&env_list);
 		free_commands(input);
 		clean_up(file_name, env);
@@ -155,7 +154,7 @@ t_here_docs	*here_doc(t_command *input, int *exit_s, t_env *env_list, char	**env
 			if (ft_strcmp(tmp->args[i], "<<") == 0)
 			{
 				save_fd(2);
-				file_name = handle_here_doc(tmp->args[i+1], env_list, exit_s, tmp, env, here_docs, tmp);
+				file_name = handle_here_doc(tmp->args[i+1], env_list, exit_s, input, env, here_docs, tmp);
 				if (file_name == NULL)
 					return (NULL);
 				tmp_n = make_heredoc_node(file_name);

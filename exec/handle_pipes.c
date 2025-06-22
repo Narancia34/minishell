@@ -65,13 +65,14 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 	t_pid	*to_free;
 	int	count;
 	t_here_docs	*here_docs_head;
+	t_here_docs	*save_head;
 
 	prev_fd = -1;
 	tmp = input;
 	pid_list = NULL;
+	save_head = here_docs;
 	while (tmp)
 	{
-		here_docs_head = here_docs;
 		if (tmp->next && pipe(fd) == -1)
 		{
 			perror("pipe failed\n");
@@ -81,6 +82,7 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 		pid = fork();
 		if (pid == 0)
 		{
+			here_docs_head = here_docs;
 			signal(SIGINT, SIG_DFL);
 			signal(SIGQUIT, SIG_DFL);
 			handle_pipe_util_a(prev_fd, fd, tmp);
@@ -99,7 +101,7 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 				exit (*exit_s);
 			}
 			if (is_builtin(args[0]) == 1)
-				exec_builtin(args, env_list, tmp->args, exit_s, here_docs);
+				exec_builtin(args, env_list, tmp->args, exit_s, here_docs_head);
 			else
 				exec_piped_cmd(args, envp, tmp->args, env_list, input, pid_list, here_docs_head, exit_s);
 			clean_up(NULL, args);
@@ -107,8 +109,7 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 			free_commands(input);
 			free_env(env_list);
 			free_pids(pid_list);
-			if (here_docs_head)
-				free_here_docs(here_docs_head);
+			free_here_docs(save_head);
 			exit(*exit_s);
 		}
 		else

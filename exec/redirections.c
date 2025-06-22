@@ -110,7 +110,6 @@ int	read_from_heredoc(t_here_docs *here_docs)
 	dup2(fd, STDIN_FILENO);
 	close(fd);
 	unlink(here_docs->file_name);
-	/*free(here_docs->file_name);*/
 	return (0);
 }
 
@@ -120,8 +119,6 @@ int	redirect_in(char **args, t_env *env_list, t_here_docs *here_docs)
 	int	fd_out;
 	int	i;
 	int	ret;
-	/*int	out = dup(STDOUT_FILENO);*/
-	/*int	in = dup(STDIN_FILENO);*/
 	(void)env_list;
 	i = 0;
 	ret = 0;
@@ -140,9 +137,7 @@ int	redirect_in(char **args, t_env *env_list, t_here_docs *here_docs)
 		{
 			fd_in = open(args[i + 1], O_RDONLY);
 			if (fd_in == -1)
-			{
 				return (1);
-			}
 			else
 			{
 				dup2(fd_in, STDIN_FILENO);
@@ -163,9 +158,6 @@ int	redirect_in(char **args, t_env *env_list, t_here_docs *here_docs)
 		{
 			read_from_heredoc(here_docs);
 			here_docs = here_docs->next;
-			/*save_fd(2);*/
-			/*dup2(in, STDIN_FILENO);*/
-			/*ft_here_doc(args[i + 1], env_list);*/
 			i+=2;
 		}
 		else
