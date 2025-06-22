@@ -138,11 +138,9 @@ int	cd_home(t_env *env_list)
 	if (chdir(path) != 0)
 	{
 		perror("minishell: cd: error\n");
-		free(path);
-		return (1);
+		return (free(path), 1);
 	}
-	free(path);
-	return (0);
+	return (free(path), 0);
 }
 
 int	cd_path(char *path)
@@ -346,7 +344,7 @@ int	print_export(t_env *env_list)
 	return (0);
 }
 
-int	add_to_env(t_env **env_list, char *arg)
+typedef struct s_export
 {
 	char	*var_name;
 	char	*var_value;
@@ -355,63 +353,86 @@ int	add_to_env(t_env **env_list, char *arg)
 	int		j;
 	int		flag;
 	t_env	*tmp;
+}	t_export;
 
-	i = 0;
-	flag = 1;
-	while (arg[i] != '=' && arg[i])
-		i++;
-	var_name = malloc(sizeof(char) * (i + 1));
-	var_value = ft_strdup(arg + i + 1);
-	j = 0;
-	while (arg[j] != '=' && arg[j])
+int	init_export(t_export *export, char *arg)
+{
+	export->i = 0;
+	export->flag = 1;
+	while (arg[export->i] != '=' && arg[export->i])
+		export->i++;
+	export->var_name = malloc(sizeof(char) * (export->i + 1));
+	if (arg[export->i] == '=')
+		export->var_value = ft_strdup(arg + export->i + 1);
+	else
+		export->var_value = ft_strdup("");
+	export->j = 0;
+	while (arg[export->j] != '=' && arg[export->j])
 	{
-		var_name[j] = arg[j];
-		j++;
+		export->var_name[export->j] = arg[export->j];
+		export->j++;
 	}
-	if (arg[j] == '=')
-		flag = 0;
-	var_name[j] = '\0';
-	if (!ft_isalpha(var_name[0]) && var_name[0] != '_')
+	if (arg[export->j] == '=')
+		export->flag = 0;
+	export->var_name[export->j] = '\0';
+	if (!ft_isalpha(export->var_name[0]) && export->var_name[0] != '_')
 	{
-		free(var_name);
-		free(var_value);
+		free(export->var_name);
+		free(export->var_value);
 		return (1);
 	}
-	i = 1;
-	while (var_name[i])
+	return (0);
+}
+
+int	export_vars(t_export *export, t_env **env_list)
+{
+	export->tmp = *env_list;
+	while (export->tmp)
 	{
-		if (!ft_isalnum(var_name[i]) && var_name[i] != '_')
+		if (ft_strcmp(export->var_name, export->tmp->var_name) == 0)
 		{
-			free(var_name);
-			free(var_value);
-			return (1);
-		}
-		i++;
-	}
-	tmp = *env_list;
-	while (tmp)
-	{
-		if (ft_strcmp(var_name, tmp->var_name) == 0)
-		{
-			if (flag == 1)
+			if (export->flag == 1)
 			{
-				free(var_name);
-				free(var_value);
+				free(export->var_name);
+				free(export->var_value);
 				return (0);
 			}
-			tmp->flag = 0;
-			free(tmp->var_value);
-			tmp->var_value = ft_strdup(var_value);
-			free(var_name);
-			free(var_value);
+			export->tmp->flag = 0;
+			free(export->tmp->var_value);
+			export->tmp->var_value = ft_strdup(export->var_value);
+			free(export->var_name);
+			free(export->var_value);
 			return (0);
 		}
-		tmp = tmp->next;
+		export->tmp = export->tmp->next;
 	}
-	new = make_node(var_name, var_value, flag);
-	add_to_list(env_list, new);
-	free(var_name);
-	free(var_value);
+	return (1);
+}
+
+int	add_to_env(t_env **env_list, char *arg)
+{
+	t_export	export;
+
+	if (init_export(&export, arg) == 1)
+		return (1);
+	export.i = 1;
+	if (export_vars(&export, env_list) == 0)
+		return (0);
+	while (export.var_name[export.i])
+	{
+		if (!ft_isalnum(export.var_name[export.i])
+			&& export.var_name[export.i] != '_')
+		{
+			free(export.var_name);
+			free(export.var_value);
+			return (1);
+		}
+		export.i++;
+	}
+	export.new = make_node(export.var_name, export.var_value, export.flag);
+	add_to_list(env_list, export.new);
+	free(export.var_name);
+	free(export.var_value);
 	return (0);
 }
 
