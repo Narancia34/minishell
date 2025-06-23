@@ -6,7 +6,7 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/08 11:09:50 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/04/12 12:36:07 by mlabrirh         ###   ########.fr       */
+/*   Updated: 2025/06/23 12:25:07 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,78 +81,62 @@ void	save_fd(int flag)
 	}
 }
 
-
 int main(int ac, char **av, char **env)
 {
 	(void)av;
 	(void)ac;
-	char *input;
-	t_env    *env_list;
-	char	**u_env;
-	t_var    *var_list;
-	int		exit_s;
 	int	ret;
-	t_token *tokens;
-	t_command *commands;
-
-	exit_s = 0;
-	env_list = init_env(env);
-	var_list = NULL;
-	handle_shlvl(&env_list);
+	t_shell	shell;
+	
+	shell.exit_s = 0;
+	shell.env_list = init_env(env);
+	handle_shlvl((&shell.env_list));
 	setup_signals();
 	while (1)
 	{
 		g_signal_flag = 0;
-		input = readline("minishell$ ");
+		shell.rl = readline("minishell$ ");
 		if (g_signal_flag == SIGINT)
-			exit_s = 130;
-		if (!input)
+			shell.exit_s = 130;
+		if (!shell.rl)
 		{
 			write(STDOUT_FILENO, "exit\n", 5);
 			break;
 		}
-		if (*input)
-			add_history(input);
-		tokens = tokenize(input);
-		if (!tokens)
+		if (*shell.rl)
+			add_history(shell.rl);
+		shell.tokens = tokenize(shell.rl);
+		if (!shell.tokens)
 		{
-			free(input);
+			free(shell.rl);
 			continue;
 		}
-		free(input);
-		expand_tokens(tokens, exit_s, env_list);
-		if (!validate_syntax(tokens))
+		free(shell.rl);
+		expand_tokens(shell.tokens, shell.exit_s, shell.env_list);
+		if (!validate_syntax(shell.tokens))
 		{
-			exit_s = 2;
-			free_tokens(tokens);
+			shell.exit_s = 2;
+			free_tokens(shell.tokens);
 			continue;
 		}
-		commands = build_commands(tokens);
-		if (!commands) {
-			free_tokens(tokens);
+		shell.input = build_commands(shell.tokens);
+		if (!shell.input) {
+			free_tokens(shell.tokens);
 			continue;
 		}
-		u_env = upd_env(env_list);
-		free_tokens(tokens);
-		ret = check_input(commands, &env_list, u_env, &exit_s);
+		free_tokens(shell.tokens);
+		shell.envp = upd_env(shell.env_list);
+		ret = check_input(&shell);
 		if (ret != 257)
 		{
-			free_commands(commands);
-			clean_up(NULL, u_env);
-			free_env(&env_list);
+			free_commands(shell.input);
+			clean_up(NULL, shell.envp);
+			free_env(&(shell.env_list));
 			exit(ret);
 		}
-		free_commands(commands);
-		clean_up(NULL, u_env);
+		free_commands(shell.input);
+		clean_up(NULL, shell.envp);
 	}
-	t_env	*env_to_free;
-	while (env_list)
-	{
-		free(env_list->var_value);
-		free(env_list->var_name);
-		env_to_free = env_list;
-		env_list = env_list->next;
-		free(env_to_free);
-	}
+	free_env(&shell.env_list);
 	return 0;
 }
