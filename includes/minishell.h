@@ -6,7 +6,7 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 13:49:55 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/06/23 15:00:09 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/23 20:44:00 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -133,6 +133,14 @@ typedef struct s_red
 	int		red;
 }	t_red;
 
+typedef struct s_path
+{
+	char	*res;
+	char	*pre_path;
+	char	**pre_paths;
+	struct stat	sb;
+}	t_path;
+
 typedef struct s_shell
 {
 	t_command	*input;
@@ -227,6 +235,8 @@ int	has_heredoc(t_command *input);
 int	has_pipe(t_command *input);
 void	handle_exec(char *path, char **args, t_shell *shell);
 void	free_all(t_shell *shell, char **args, t_here_docs *here_docs);
+char	*cat_path_cmd(char *pre_path, char *full_cmd);
+char	*find_pre_path(char **envp);
 
 
 #endif
