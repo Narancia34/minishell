@@ -56,8 +56,8 @@ void	wich_builtin(t_shell *shell, char **arg)
 
 void	save_out_in(int flag)
 {
-	int	saved_stdout;
-	int	saved_stdin;
+	static int	saved_stdout;
+	static int	saved_stdin;
 
 	if (flag == 0)
 	{
