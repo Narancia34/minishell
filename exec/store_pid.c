@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/23 16:24:53 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/05/23 16:47:05 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/23 17:02:07 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,7 +15,6 @@
 t_pid	*make_pid_node(pid_t pid)
 {
 	t_pid	*node;
-	(void)pid;
 
 	node = (t_pid *)malloc(sizeof(t_pid));
 	if (!node)
