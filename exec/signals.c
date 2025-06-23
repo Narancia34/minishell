@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/21 10:25:56 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/05/21 10:45:23 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/23 17:01:15 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,7 +30,7 @@ void	handle_sigquit(int signal)
 	g_signal_flag = SIGQUIT;
 }
 
-void	setup_signals()
+void	setup_signals(void)
 {
 	struct sigaction	sa;
 
@@ -42,7 +42,7 @@ void	setup_signals()
 	sigaction(SIGQUIT, &sa, NULL);
 }
 
-void	ignore_signals()
+void	ignore_signals(void)
 {
 	struct sigaction	sa;
 
