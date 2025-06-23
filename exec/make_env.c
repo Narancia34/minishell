@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/11 09:53:32 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/11 10:53:35 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/23 15:07:01 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -56,41 +56,37 @@ void	add_node(t_env **env_list, t_env *new_n)
 	new_n->prev = current;
 }
 
-void free_split(char **split)
+void	free_split(char **split)
 {
-    int i;
+	int	i;
 
-    i = 0;
-    while (split[i])
-    {
-        free(split[i]);
-        i++;
-    }
-    free(split);
+	i = 0;
+	while (split[i])
+	{
+		free(split[i]);
+		i++;
+	}
+	free(split);
 }
 
-
-void set_env(t_env **env_list)
+void	set_env(t_env **env_list)
 {
-    char cwd[1024];
-    t_env *pwd_node;
-    t_env *shlvl_node;
+	char	cwd[1024];
+	t_env	*pwd_node;
+	t_env	*shlvl_node;
 
-    if (getcwd(cwd, sizeof(cwd)) == NULL)
-        return ;
-
-    pwd_node = malloc(sizeof(t_env));
-    pwd_node->var_name = ft_strdup("PWD");
-    pwd_node->var_value = ft_strdup(cwd);
-    pwd_node->next = NULL;
-
-    shlvl_node = malloc(sizeof(t_env));
-    shlvl_node->var_name = ft_strdup("SHLVL");
-    shlvl_node->var_value = ft_strdup("0");
-    shlvl_node->next = NULL;
-
-    *env_list = pwd_node;
-    pwd_node->next = shlvl_node;
+	if (getcwd(cwd, sizeof(cwd)) == NULL)
+		return ;
+	pwd_node = malloc(sizeof(t_env));
+	pwd_node->var_name = ft_strdup("PWD");
+	pwd_node->var_value = ft_strdup(cwd);
+	pwd_node->next = NULL;
+	shlvl_node = malloc(sizeof(t_env));
+	shlvl_node->var_name = ft_strdup("SHLVL");
+	shlvl_node->var_value = ft_strdup("0");
+	shlvl_node->next = NULL;
+	*env_list = pwd_node;
+	pwd_node->next = shlvl_node;
 }
 
 t_env	*init_env(char	**env)
