@@ -6,12 +6,12 @@
 #    By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+         #
 #                                                 +#+#+#+#+#+   +#+            #
 #    Created: 2025/04/08 11:31:47 by mlabrirh          #+#    #+#              #
-#    Updated: 2025/04/08 11:33:34 by mlabrirh         ###   ########.fr        #
+#    Updated: 2025/06/23 12:22:30 by mgamraou         ###   ########.fr        #
 #                                                                              #
 # **************************************************************************** #
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror
+CFLAGS = -Wall -Wextra -Werror -g
 LDFLAGS = -lreadline
 NAME = minishell
 
