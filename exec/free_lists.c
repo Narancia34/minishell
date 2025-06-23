@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/12 11:17:40 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/12 11:52:55 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/23 15:04:05 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,6 +15,7 @@
 void	free_env(t_env **env_list)
 {
 	t_env	*tmp;
+
 	while (*env_list)
 	{
 		free((*env_list)->var_value);
@@ -28,6 +29,7 @@ void	free_env(t_env **env_list)
 void	free_pids(t_pid *pid_list)
 {
 	t_pid	*tmp;
+
 	while (pid_list)
 	{
 		tmp = pid_list;
@@ -39,6 +41,7 @@ void	free_pids(t_pid *pid_list)
 void	free_here_docs(t_here_docs *here_docs)
 {
 	t_here_docs	*tmp;
+
 	while (here_docs)
 	{
 		free(here_docs->file_name);
