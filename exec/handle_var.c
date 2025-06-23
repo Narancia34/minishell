@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/05/03 17:07:13 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/05/03 18:27:51 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/23 16:59:48 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -46,7 +46,7 @@ void	add_to_list(t_env **env_list, t_env *new_n)
 	if (!*env_list)
 	{
 		*env_list = new_n;
-		return;
+		return ;
 	}
 	current = *env_list;
 	while (current->next)
