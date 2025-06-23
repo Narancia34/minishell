@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/18 10:17:15 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/23 15:00:35 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/23 21:08:10 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,7 +19,7 @@ void	handle_child(t_shell *shell, char **args,
 
 	signal(SIGINT, SIG_DFL);
 	signal(SIGQUIT, SIG_DFL);
-	if (redirect_in(o_args, shell->env_list, here_docs) == 1)
+	if (redirect(o_args, here_docs) == 1)
 	{
 		free_all(shell, args, here_docs);
 		exit(EXIT_FAILURE);

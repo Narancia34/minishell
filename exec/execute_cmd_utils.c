@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/23 14:51:22 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/23 15:01:31 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/23 21:09:44 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,7 +42,7 @@ void	exec_piped_cmd(t_shell *shell, char **args,
 {
 	char	*cmd_path;
 
-	if (redirect_in(o_args, shell->env_list, here_docs) == 1)
+	if (redirect(o_args, here_docs) == 1)
 	{
 		free_commands(shell->input);
 		clean_up(NULL, args);

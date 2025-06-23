@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 14:05:26 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/23 16:58:27 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/23 21:10:11 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -81,7 +81,7 @@ int	exec_builtin(t_shell *shell, char **arg,
 	if (!arg || !arg[0])
 		return (0);
 	save_out_in(0);
-	if (redirect_in(o_args, shell->env_list, here_docs) == 1)
+	if (redirect(o_args, here_docs) == 1)
 	{
 		ft_putstr_fd("minishell: redirection error\n", 2);
 		shell->exit_s = 1;

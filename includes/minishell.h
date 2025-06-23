@@ -6,7 +6,7 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 13:49:55 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/06/23 20:44:00 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/23 22:03:47 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -141,6 +141,13 @@ typedef struct s_path
 	struct stat	sb;
 }	t_path;
 
+typedef struct s_redirection
+{
+	int	fd_in;
+	int	fd_out;
+	int	i;
+}	t_redirection;
+
 typedef struct s_shell
 {
 	t_command	*input;
@@ -206,7 +213,7 @@ int	ft_cd(char **arg, t_env **env_list);
 int	ft_echo(char **arg);
 int	ft_pwd();
 int	ft_env(t_env *env_list);
-int	redirect_in(char **args, t_env *env_list, t_here_docs *here_docs);
+int	redirect(char **args, t_here_docs *here_docs);
 char	**upd_env(t_env *env_list);
 void	handle_pipeline(t_shell *shell, t_check *check, t_here_docs *here_docs);
 char	**get_cmd(char **o_args);
@@ -237,6 +244,7 @@ void	handle_exec(char *path, char **args, t_shell *shell);
 void	free_all(t_shell *shell, char **args, t_here_docs *here_docs);
 char	*cat_path_cmd(char *pre_path, char *full_cmd);
 char	*find_pre_path(char **envp);
+int	read_from_heredoc(t_here_docs *here_docs);
 
 
 #endif
