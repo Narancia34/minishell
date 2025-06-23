@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 10:26:23 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/12 11:58:24 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/23 12:19:22 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ void	add_heredoc_node(t_here_docs **here_docs, t_here_docs *new_n)
 	current->next = new_n;
 }
 
-char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *input, char **env, t_here_docs *here_docs, t_command *tmp_c)
+char	*handle_here_doc(char *delimiter, t_shell *shell, t_here_docs *here_docs, t_command *tmp_c)
 {
 	char	*line;
 	char	*res;
@@ -107,23 +107,23 @@ char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *
 			perror("open()");
 			return (NULL);
 		}
-		expanded = expand_env_vars(res, *exit_s, env_list, tmp_c->flag);
+		expanded = expand_env_vars(res, shell->exit_s, shell->env_list, tmp_c->flag);
 		ft_putstr_fd(expanded, fd);
 		free(expanded);
 		free(res);
 		close(fd);
-		free_env(&env_list);
-		free_commands(input);
-		clean_up(file_name, env);
+		free_env(&shell->env_list);
+		free_commands(shell->input);
+		clean_up(file_name, shell->envp);
 		free_here_docs(here_docs);
 		exit(EXIT_SUCCESS);
 	}
 	waitpid(pid, &status, 0);
 	if (WIFEXITED(status))
-		*exit_s = WEXITSTATUS(status);
+		shell->exit_s = WEXITSTATUS(status);
 	else if (WIFSIGNALED(status))
 	{
-	*exit_s = 130;
+	shell->exit_s = 130;
 	printf("\n");
 	unlink(file_name);
 	free(file_name);
@@ -135,7 +135,7 @@ char	*handle_here_doc(char *delimiter, t_env *env_list, int *exit_s, t_command *
 	return (file_name);
 }
 
-t_here_docs	*here_doc(t_command *input, int *exit_s, t_env *env_list, char	**env)
+t_here_docs	*here_doc(t_shell *shell)
 {
 	t_command	*tmp;
 	t_here_docs	*tmp_n;
@@ -143,9 +143,8 @@ t_here_docs	*here_doc(t_command *input, int *exit_s, t_env *env_list, char	**env
 	int	i;
 	t_here_docs	*here_docs;
 
-	(void)exit_s;
 	here_docs = NULL;
-	tmp = input;
+	tmp = shell->input;
 	while (tmp)
 	{
 		i = 0;
@@ -154,7 +153,7 @@ t_here_docs	*here_doc(t_command *input, int *exit_s, t_env *env_list, char	**env
 			if (ft_strcmp(tmp->args[i], "<<") == 0)
 			{
 				save_fd(2);
-				file_name = handle_here_doc(tmp->args[i+1], env_list, exit_s, input, env, here_docs, tmp);
+				file_name = handle_here_doc(tmp->args[i+1], shell, here_docs, tmp);
 				if (file_name == NULL)
 					return (NULL);
 				tmp_n = make_heredoc_node(file_name);

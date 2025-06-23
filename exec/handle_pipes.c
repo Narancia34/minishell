@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/26 10:51:42 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/13 11:12:44 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/23 13:10:56 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,7 +52,7 @@ int	count_here_docs(char	**cmd)
 	return (res);
 }
 
-void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit_s, t_here_docs *here_docs)
+void	handle_pipeline(t_shell *shell, t_check *check, t_here_docs *here_docs)
 {
 	int		fd[2];
 	int		prev_fd;
@@ -60,16 +60,16 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 	int		status;
 	t_command	*tmp;
 	char	**args;
-	t_pid	*pid_list;
 	t_pid	*tmp_n;
 	t_pid	*to_free;
 	int	count;
 	t_here_docs	*here_docs_head;
 	t_here_docs	*save_head;
+	(void)check;
 
 	prev_fd = -1;
-	tmp = input;
-	pid_list = NULL;
+	tmp = shell->input;
+	shell->pid_list = NULL;
 	save_head = here_docs;
 	while (tmp)
 	{
@@ -92,30 +92,30 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 				perror("minishell: error parsing command!/n");
 				tmp = tmp->next;
 				clean_up(NULL, args);
-				clean_up(NULL, envp);
-				free_commands(input);
-				free_env(env_list);
-				free_pids(pid_list);
+				clean_up(NULL, shell->envp);
+				free_commands(shell->input);
+				free_env(&shell->env_list);
+				free_pids(shell->pid_list);
 				if (here_docs_head)
 					free_here_docs(here_docs_head);
-				exit (*exit_s);
+				exit (shell->exit_s);
 			}
 			if (is_builtin(args[0]) == 1)
-				exec_builtin(args, env_list, tmp->args, exit_s, here_docs_head);
+				exec_builtin(shell, args, tmp->args, here_docs_head);
 			else
-				exec_piped_cmd(args, envp, tmp->args, env_list, input, pid_list, here_docs_head, exit_s);
+				exec_piped_cmd(shell, args, tmp->args, here_docs_head);
 			clean_up(NULL, args);
-			clean_up(NULL, envp);
-			free_commands(input);
-			free_env(env_list);
-			free_pids(pid_list);
+			clean_up(NULL, shell->envp);
+			free_commands(shell->input);
+			free_env(&shell->env_list);
+			free_pids(shell->pid_list);
 			free_here_docs(save_head);
-			exit(*exit_s);
+			exit(shell->exit_s);
 		}
 		else
 			handle_pipe_util_b(&prev_fd, fd);
 		tmp_n = make_pid_node(pid);
-		add_pid_node(&pid_list, tmp_n);
+		add_pid_node(&shell->pid_list, tmp_n);
 		count = count_here_docs(tmp->args);
 		while (count > 0)
 		{
@@ -124,7 +124,7 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 		}
 		tmp = tmp->next;
 	}
-	tmp_n = pid_list;
+	tmp_n = shell->pid_list;
 	while (tmp_n)
 	{
 		waitpid(tmp_n->pid, &status, 0);
@@ -133,19 +133,19 @@ void	handle_pipeline(t_command  *input, t_env **env_list, char **envp, int *exit
 		free(to_free);
 	}
 	if (WIFEXITED(status))
-		*exit_s = WEXITSTATUS(status);
+		shell->exit_s = WEXITSTATUS(status);
 	else if (WIFSIGNALED(status))
 	{
 		g_signal_flag = WTERMSIG(status);
 		if (g_signal_flag == 2)
 		{
-			*exit_s = 130;
+			shell->exit_s = 130;
 			g_signal_flag = 0;
 			printf("\n");
 		}
 		else if (g_signal_flag == 3)
 		{
-			*exit_s = 131;
+			shell->exit_s = 131;
 			g_signal_flag = 0;
 			printf("Quit (core dumped)\n");
 		}

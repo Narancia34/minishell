@@ -6,7 +6,7 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/29 14:05:26 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/11 11:19:32 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/23 13:08:35 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -29,16 +29,16 @@ int	is_builtin(char *arg)
 	return (0);
 }
 
-int	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s, t_here_docs *here_docs)
+int	exec_builtin(t_shell *shell, char **arg, char **o_args, t_here_docs *here_docs)
 {
 	int	res;
 	if (!arg || !arg[0])
 		return (0);
 	int saved_stdout = dup(STDOUT_FILENO);
 	int saved_stdin = dup(STDIN_FILENO);
-	if (redirect_in(o_args, *env_list, here_docs) == 1) {
+	if (redirect_in(o_args, shell->env_list, here_docs) == 1) {
 		ft_putstr_fd("minishell: redirection error\n", 2);
-		*exit_s = 1;
+		shell->exit_s = 1;
 		if (here_docs)
 			free_here_docs(here_docs);
 		dup2(saved_stdout, STDOUT_FILENO);
@@ -47,25 +47,25 @@ int	exec_builtin(char **arg, t_env **env_list, char **o_args, int *exit_s, t_her
 		return (257);
 	}
 	if (ft_strcmp(arg[0], "echo") == 0)
-		*exit_s = ft_echo(arg);
+		shell->exit_s = ft_echo(arg);
 	if (ft_strcmp(arg[0], "cd") == 0)
-		*exit_s = ft_cd(arg, env_list);
+		shell->exit_s = ft_cd(arg, &shell->env_list);
 	if (ft_strcmp(arg[0], "pwd") == 0)
-		*exit_s = ft_pwd();
+		shell->exit_s = ft_pwd();
 	if (ft_strcmp("env", arg[0]) == 0)
-		*exit_s = ft_env(*env_list);
+		shell->exit_s = ft_env(shell->env_list);
 	if (ft_strcmp("exit", arg[0]) == 0)
 	{
 		res = ft_exit(arg);
 		if (res == 257)
-			*exit_s = 1;
+			shell->exit_s = 1;
 		else
 			return (res);
 	}
 	if (ft_strcmp(arg[0], "unset") == 0)
-		*exit_s = ft_unset(arg, env_list);
+		shell->exit_s = ft_unset(arg, &shell->env_list);
 	if (ft_strcmp(arg[0], "export") == 0)
-		*exit_s = ft_export(arg, env_list);
+		shell->exit_s = ft_export(arg, &shell->env_list);
 	dup2(saved_stdout, STDOUT_FILENO);
 	dup2(saved_stdin, STDIN_FILENO);
 	close(saved_stdout);
