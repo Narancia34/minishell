@@ -6,7 +6,7 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 13:49:55 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/06/23 22:03:47 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/24 10:03:58 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -148,6 +148,22 @@ typedef struct s_redirection
 	int	i;
 }	t_redirection;
 
+typedef struct s_pipeline
+{
+	int	fd[2];
+	int	prev_fd;
+	pid_t	pid;
+	int	status;
+	t_command	*tmp;
+	char	**args;
+	t_pid	*tmp_n;
+	t_pid	*to_free;
+	int	count;
+	t_here_docs	*here_docs_head;
+	t_here_docs	*saved_head;
+}	t_pipeline;
+
+
 typedef struct s_shell
 {
 	t_command	*input;
@@ -215,7 +231,7 @@ int	ft_pwd();
 int	ft_env(t_env *env_list);
 int	redirect(char **args, t_here_docs *here_docs);
 char	**upd_env(t_env *env_list);
-void	handle_pipeline(t_shell *shell, t_check *check, t_here_docs *here_docs);
+void	handle_pipeline(t_shell *shell, t_here_docs *here_docs);
 char	**get_cmd(char **o_args);
 int	ft_unset(char **args, t_env **env_list);
 void	handle_var(t_var **var_list, char *arg);
@@ -245,6 +261,12 @@ void	free_all(t_shell *shell, char **args, t_here_docs *here_docs);
 char	*cat_path_cmd(char *pre_path, char *full_cmd);
 char	*find_pre_path(char **envp);
 int	read_from_heredoc(t_here_docs *here_docs);
-
+void	collect_exit_s(int status, t_shell *shell);
+void	handle_pipe_util_a(int prev_fd, int *fd, t_command *tmp);
+void	handle_pipe_util_b(int *prev_fd, int*fd);
+int	count_here_docs(char	**cmd);
+void	handle_child_p(t_shell *shell, t_here_docs *here_docs, t_pipeline *pipeline);
+void	handle_pipe_util_c(t_shell *shell, t_pipeline *pipeline, t_here_docs *here_docs);
+void	wait_for_pipes(t_shell *shell, t_pipeline *pipeline);
 
 #endif

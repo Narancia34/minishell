@@ -50,7 +50,7 @@ int	check_input(t_shell *shell)
 	if (check_heredoc(&check, shell) == 1)
 		return (257);
 	if (has_pipe(shell->input) > 1)
-		handle_pipeline(shell, &check, check.here_docs);
+		handle_pipeline(shell, check.here_docs);
 	else
 	{
 		check.tmp = shell->input;
