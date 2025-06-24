@@ -73,7 +73,7 @@ void	handle_pipeline(t_shell *shell, t_here_docs *here_docs)
 			handle_child_p(shell, here_docs, &pipeline);
 		else
 			handle_pipe_util_b(&pipeline.prev_fd, pipeline.fd);
-		handle_pipe_util_c(shell, &pipeline, here_docs);
+		handle_pipe_util_c(shell, &pipeline, &here_docs);
 	}
 	wait_for_pipes(shell, &pipeline);
 	setup_signals();

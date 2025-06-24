@@ -266,7 +266,7 @@ void	handle_pipe_util_a(int prev_fd, int *fd, t_command *tmp);
 void	handle_pipe_util_b(int *prev_fd, int*fd);
 int	count_here_docs(char	**cmd);
 void	handle_child_p(t_shell *shell, t_here_docs *here_docs, t_pipeline *pipeline);
-void	handle_pipe_util_c(t_shell *shell, t_pipeline *pipeline, t_here_docs *here_docs);
+void	handle_pipe_util_c(t_shell *shell, t_pipeline *pipeline, t_here_docs **here_docs);
 void	wait_for_pipes(t_shell *shell, t_pipeline *pipeline);
 
 #endif

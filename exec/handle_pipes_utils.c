@@ -24,6 +24,17 @@ void	free_for_child(t_shell *shell, t_pipeline *pipeline)
 	exit (shell->exit_s);
 }
 
+void	free_for_child_b(t_shell *shell, t_pipeline *pipeline)
+{
+	clean_up(NULL, pipeline->args);
+	clean_up(NULL, shell->envp);
+	free_commands(shell->input);
+	free_env(&shell->env_list);
+	free_pids(shell->pid_list);
+	free_here_docs(pipeline->saved_head);
+	exit(shell->exit_s);
+}
+
 void	handle_child_p(t_shell *shell,
 		t_here_docs *here_docs, t_pipeline *pipeline)
 {
@@ -44,19 +55,18 @@ void	handle_child_p(t_shell *shell,
 	else
 		exec_piped_cmd(shell, pipeline->args,
 			pipeline->tmp->args, pipeline->here_docs_head);
-	free_here_docs(pipeline->saved_head);
-	free_for_child(shell, pipeline);
+	free_for_child_b(shell, pipeline);
 }
 
 void	handle_pipe_util_c(t_shell *shell,
-		t_pipeline *pipeline, t_here_docs *here_docs)
+		t_pipeline *pipeline, t_here_docs **here_docs)
 {
 	pipeline->tmp_n = make_pid_node(pipeline->pid);
 	add_pid_node(&shell->pid_list, pipeline->tmp_n);
 	pipeline->count = count_here_docs(pipeline->tmp->args);
 	while (pipeline->count > 0)
 	{
-		here_docs = here_docs->next;
+		*here_docs = (*here_docs)->next;
 		pipeline->count--;
 	}
 	pipeline->tmp = pipeline->tmp->next;

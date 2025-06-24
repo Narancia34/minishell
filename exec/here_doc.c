@@ -135,6 +135,15 @@ char	*handle_here_doc(char *delimiter, t_shell *shell, t_here_docs *here_docs, t
 	return (file_name);
 }
 
+typedef struct s_hd
+{
+	t_command	*tmp;
+	t_here_docs	*tmp_n;
+	t_here_docs	*here_docs;
+	char	*file_name;
+	int	i;
+}	t_hd;
+
 t_here_docs	*here_doc(t_shell *shell)
 {
 	t_command	*tmp;

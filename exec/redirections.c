@@ -47,7 +47,7 @@ int	red_append(char **args, t_redirection *fd)
 	return (0);
 }
 
-int	redirect_utils(char **args, t_redirection *fd, t_here_docs *here_docs)
+int	redirect_utils(char **args, t_redirection *fd, t_here_docs **here_docs)
 {
 	if (ft_strcmp(args[fd->i], ">>") == 0)
 	{
@@ -56,8 +56,8 @@ int	redirect_utils(char **args, t_redirection *fd, t_here_docs *here_docs)
 	}
 	else if (ft_strcmp(args[fd->i], "<<") == 0)
 	{
-		read_from_heredoc(here_docs);
-		here_docs = here_docs->next;
+		read_from_heredoc(*here_docs);
+		*here_docs = (*here_docs)->next;
 		fd->i += 2;
 	}
 	else
@@ -84,7 +84,7 @@ int	redirect(char **args, t_here_docs *here_docs)
 		}
 		else
 		{
-			if (redirect_utils(args, &fd, here_docs) == 1)
+			if (redirect_utils(args, &fd, &here_docs) == 1)
 				return (1);
 		}
 	}
