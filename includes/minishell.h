@@ -6,7 +6,7 @@
 /*   By: mlabrirh <marvin@42.fr>                    +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/06 13:49:55 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/06/24 10:03:58 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/24 12:10:07 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -163,6 +163,27 @@ typedef struct s_pipeline
 	t_here_docs	*saved_head;
 }	t_pipeline;
 
+typedef struct s_hd
+{
+	t_command	*tmp;
+	t_here_docs	*tmp_n;
+	t_here_docs	*here_docs;
+	char	*file_name;
+	int	i;
+}	t_hd;
+
+typedef struct s_here_d
+{
+	char	*line;
+	char	*res;
+	char	*tmp;
+	char	*file_name;
+	char	*expanded;
+	int		fd;
+	pid_t	pid;
+	int	status;
+}	t_here_d;
+
 
 typedef struct s_shell
 {
@@ -268,5 +289,9 @@ int	count_here_docs(char	**cmd);
 void	handle_child_p(t_shell *shell, t_here_docs *here_docs, t_pipeline *pipeline);
 void	handle_pipe_util_c(t_shell *shell, t_pipeline *pipeline, t_here_docs **here_docs);
 void	wait_for_pipes(t_shell *shell, t_pipeline *pipeline);
+char	*make_file_name(void);
+t_here_docs	*make_heredoc_node(char *file_name);
+void	add_heredoc_node(t_here_docs **here_docs, t_here_docs *new_n);
+
 
 #endif

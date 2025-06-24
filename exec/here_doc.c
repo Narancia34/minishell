@@ -6,173 +6,118 @@
 /*   By: mgamraou <mgamraou@student.1337.ma>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/06/11 10:26:23 by mgamraou          #+#    #+#             */
-/*   Updated: 2025/06/23 12:19:22 by mgamraou         ###   ########.fr       */
+/*   Updated: 2025/06/24 12:18:44 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../includes/minishell.h"
 
-char	*make_file_name()
+void	here_doc_utils(t_here_d *here_d, char *delimiter)
 {
-	char	*res;
-	int		fd;
-	int		i;
-	ssize_t	b;
-
-	res = malloc(sizeof(char) * 10);
-	if (!res)
-		return (NULL);
-	fd = open("/dev/urandom", O_RDONLY);
-	b = read(fd, res, 9);
-	if (b == -1)
-		perror("read()");
-	res[9] = '\0';
-	close(fd);
-	i = 0;
-	while (res[i])
+	signal(SIGQUIT, SIG_IGN);
+	signal(SIGINT, SIG_DFL);
+	here_d->res = ft_strdup("");
+	while (1)
 	{
-		res[i] = (res[i] % 26) + 'a';
-		i++;
+		here_d->line = readline(">");
+		if (!here_d->line)
+		{
+			ft_putstr_fd("here-document delimited by end-of-file\n", 2);
+			break ;
+		}
+		if (ft_strcmp(here_d->line, delimiter) == 0)
+			break ;
+		here_d->tmp = here_d->line;
+		here_d->line = ft_strjoin(here_d->line, "\n");
+		free(here_d->tmp);
+		here_d->tmp = here_d->res;
+		here_d->res = ft_strjoin(here_d->res, here_d->line);
+		free (here_d->tmp);
+		free (here_d->line);
 	}
-	return (res);
 }
 
-t_here_docs	*make_heredoc_node(char *file_name)
+void	here_doc_utils_b(t_here_d *here_d,
+			t_command *tmp_c, t_shell *shell, t_here_docs *here_docs)
 {
-	t_here_docs	*node;
-
-	node = malloc(sizeof(t_here_docs));
-	if (!node)
-		return (NULL);
-	node->file_name = ft_strdup(file_name);
-	node->next = NULL;
-	return (node);
+	here_d->expanded = expand_env_vars(here_d->res,
+			shell->exit_s, shell->env_list, tmp_c->flag);
+	ft_putstr_fd(here_d->expanded, here_d->fd);
+	free(here_d->expanded);
+	free(here_d->res);
+	close(here_d->fd);
+	free_env(&shell->env_list);
+	free_commands(shell->input);
+	clean_up(here_d->file_name, shell->envp);
+	free_here_docs(here_docs);
+	exit(EXIT_SUCCESS);
 }
 
-void	add_heredoc_node(t_here_docs **here_docs, t_here_docs *new_n)
+char	*here_doc_utils_c(t_here_d *here_d, t_shell *shell)
 {
-	t_here_docs	*current;
-
-	if (!*here_docs)
+	waitpid(here_d->pid, &here_d->status, 0);
+	if (WIFEXITED(here_d->status))
+		shell->exit_s = WEXITSTATUS(here_d->status);
+	else if (WIFSIGNALED(here_d->status))
 	{
-		*here_docs = new_n;
-		return ;
+		shell->exit_s = 130;
+		printf("\n");
+		unlink(here_d->file_name);
+		free(here_d->file_name);
+		setup_signals();
+		g_signal_flag = WTERMSIG(here_d->status);
+		return (NULL);
 	}
-	current = *here_docs;
-	while (current->next)
-		current = current->next;
-	current->next = new_n;
+	setup_signals();
+	return (here_d->file_name);
 }
 
-char	*handle_here_doc(char *delimiter, t_shell *shell, t_here_docs *here_docs, t_command *tmp_c)
+char	*handle_here_doc(t_shell *shell, t_command *tmp_c, t_hd *hd)
 {
-	char	*line;
-	char	*res;
-	char	*tmp;
-	char	*file_name;
-	char	*expanded;
-	int		fd;
-	pid_t	pid;
-	int	status;
+	t_here_d	here_d;
 
 	ignore_signals();
-	file_name = make_file_name();
-	pid = fork();
-	if (pid == 0)
+	here_d.file_name = make_file_name();
+	here_d.pid = fork();
+	if (here_d.pid == 0)
 	{
-		signal(SIGQUIT, SIG_IGN);
-		signal(SIGINT, SIG_DFL);
-		res = ft_strdup("");
-		while (1)
-		{
-			line = readline(">");
-			if (!line)
-			{
-				ft_putstr_fd("warining: here-document delimited by end-of-file\n", 2);
-				break ;
-			}
-			if (ft_strcmp(line, delimiter) == 0)
-				break ;
-			tmp = line;
-			line = ft_strjoin(line, "\n");
-			free(tmp);
-			tmp = res;
-			res = ft_strjoin(res, line);
-			free (tmp);
-			free (line);
-		}
-		fd = open(file_name, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-		if (fd == -1)
+		here_doc_utils(&here_d, hd->tmp->args[hd->i + 1]);
+		here_d.fd = open(here_d.file_name, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+		if (here_d.fd == -1)
 		{
 			perror("open()");
 			return (NULL);
 		}
-		expanded = expand_env_vars(res, shell->exit_s, shell->env_list, tmp_c->flag);
-		ft_putstr_fd(expanded, fd);
-		free(expanded);
-		free(res);
-		close(fd);
-		free_env(&shell->env_list);
-		free_commands(shell->input);
-		clean_up(file_name, shell->envp);
-		free_here_docs(here_docs);
-		exit(EXIT_SUCCESS);
+		here_doc_utils_b(&here_d, tmp_c, shell, hd->here_docs);
 	}
-	waitpid(pid, &status, 0);
-	if (WIFEXITED(status))
-		shell->exit_s = WEXITSTATUS(status);
-	else if (WIFSIGNALED(status))
-	{
-	shell->exit_s = 130;
-	printf("\n");
-	unlink(file_name);
-	free(file_name);
-	setup_signals();
-	g_signal_flag = WTERMSIG(status);
-	return (NULL);
+	return (here_doc_utils_c(&here_d, shell));
 }
-	setup_signals();
-	return (file_name);
-}
-
-typedef struct s_hd
-{
-	t_command	*tmp;
-	t_here_docs	*tmp_n;
-	t_here_docs	*here_docs;
-	char	*file_name;
-	int	i;
-}	t_hd;
 
 t_here_docs	*here_doc(t_shell *shell)
 {
-	t_command	*tmp;
-	t_here_docs	*tmp_n;
-	char	*file_name;
-	int	i;
-	t_here_docs	*here_docs;
+	t_hd	hd;
 
-	here_docs = NULL;
-	tmp = shell->input;
-	while (tmp)
+	hd.here_docs = NULL;
+	hd.tmp = shell->input;
+	while (hd.tmp)
 	{
-		i = 0;
-		while (tmp->args[i])
+		hd.i = 0;
+		while (hd.tmp->args[hd.i])
 		{
-			if (ft_strcmp(tmp->args[i], "<<") == 0)
+			if (ft_strcmp(hd.tmp->args[hd.i], "<<") == 0)
 			{
 				save_fd(2);
-				file_name = handle_here_doc(tmp->args[i+1], shell, here_docs, tmp);
-				if (file_name == NULL)
+				hd.file_name = handle_here_doc(shell, hd.tmp, &hd);
+				if (hd.file_name == NULL)
 					return (NULL);
-				tmp_n = make_heredoc_node(file_name);
-				free(file_name);
-				add_heredoc_node(&here_docs, tmp_n);
-				i++;
+				hd.tmp_n = make_heredoc_node(hd.file_name);
+				free(hd.file_name);
+				add_heredoc_node(&hd.here_docs, hd.tmp_n);
+				hd.i++;
 			}
-			i++;
+			hd.i++;
 		}
-		tmp = tmp->next;
+		hd.tmp = hd.tmp->next;
 	}
-	return (here_docs);
+	return (hd.here_docs);
 }
