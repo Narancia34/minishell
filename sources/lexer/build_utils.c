@@ -6,7 +6,7 @@
 /*   By: mlabrirh <mlabrirh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/20 18:12:05 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/06/20 18:09:57 by mlabrirh         ###   ########.fr       */
+/*   Updated: 2025/06/24 13:58:05 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -45,42 +45,51 @@ char	**ft_realloc(char *arg, char **old_arr)
 	return (new_arr);
 }
 
-void	set_size(t_command *head)
+void	free_single_command(t_command *cmd)
 {
-	int	count;
+	int	i;
 
-	while (head)
+	if (!cmd)
+		return ;
+	if (cmd->args)
 	{
-		if (head->args)
+		i = 0;
+		while (cmd->args[i])
 		{
-			count = 0;
-			while (head->args[count])
-				count++;
-			head->arg_size = count;
+			free(cmd->args[i]);
+			i++;
 		}
-		else
-			head->arg_size = 0;
-		head = head->next;
+		free(cmd->args);
+	}
+	free(cmd);
+}
+
+void	free_cmd(t_command *cmd)
+{
+	t_command	*tmp;
+
+	while (cmd)
+	{
+		tmp = cmd->next;
+		free_single_command(cmd);
+		cmd = tmp;
 	}
 }
 
-void	set_type(t_command *head)
+int	append_arg(t_command *cmd, const char *value)
 {
-	while (head)
+	char	*arg_dup;
+	char	**tmp_args;
+
+	arg_dup = ft_strdup(value);
+	if (!arg_dup)
+		return (0);
+	tmp_args = ft_realloc(arg_dup, cmd->args);
+	if (!tmp_args)
 	{
-		if (head->args != NULL)
-		{
-			if (ft_strncmp(head->args[0], "|", 2) == 0)
-				head->type = TOKEN_PIPE;
-			else if (ft_strncmp(head->args[0], ">>", 3) == 0)
-				head->type = TOKEN_REDIR_APPEND;
-			else if (ft_strncmp(head->args[0], ">", 2) == 0)
-				head->type = TOKEN_REDIR_OUT;
-			else if (ft_strncmp(head->args[0], "<", 2) == 0)
-				head->type = TOKEN_REDIR_IN;
-			else
-				head->type = TOKEN_WORD;
-		}
-		head = head->next;
+		free(arg_dup);
+		return (0);
 	}
+	cmd->args = tmp_args;
+	return (1);
 }

@@ -6,39 +6,11 @@
 /*   By: mlabrirh <mlabrirh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/21 10:52:53 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/06/14 10:39:29 by mlabrirh         ###   ########.fr       */
+/*   Updated: 2025/06/24 13:58:12 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "../../includes/minishell.h"
-
-t_token	*ft_add_token(t_token **token_list,
-		char *value, token_type type, int *quote)
-{
-	t_token	*new_token;
-	t_token	*current;
-
-	new_token = malloc(sizeof(t_token));
-	if (!new_token)
-		return (NULL);
-	new_token->value = ft_strdup(value);
-	if (!new_token->value)
-		return (free(new_token), NULL);
-	new_token->is_single_quoted = quote[0];
-	new_token->is_double_quoted = quote[1];
-	new_token->type = type;
-	new_token->next = NULL;
-	if (*token_list == NULL)
-	{
-		*token_list = new_token;
-		return (new_token);
-	}
-	current = *token_list;
-	while (current->next != NULL)
-		current = current->next;
-	current->next = new_token;
-	return (new_token);
-}
 
 char	*read_operator(const char *str, int *i)
 {
@@ -123,10 +95,7 @@ char	*read_word(const char *str, int *i, int *quote)
 	{
 		if (str[*i] == '\'' || str[*i] == '"')
 		{
-			if (str[*i] == '"')
-				quote[1] = 1;
-			else if (str[*i] == '\'')
-				quote[0] = 1;
+			quote[('\'' - str[*i]) != 0] = 1;
 			content = handle_unquoted_section(str, i, &start, content);
 			content = handle_quoted_section(str, i, content);
 			if (!content)
@@ -134,26 +103,10 @@ char	*read_word(const char *str, int *i, int *quote)
 			start = *i;
 		}
 		else
-		(*i)++;
+			(*i)++;
 	}
 	content = handle_unquoted_section(str, i, &start, content);
-	if (content)
-		return (content);
-	else
+	if (!content)
 		return (ft_strdup(""));
-}
-
-token_type      get_operation_type(const char *op)
-{
-	if (ft_strcmp(op, ">") == 0)
-		return (TOKEN_REDIR_OUT);
-	if (ft_strcmp(op, ">>") == 0)
-		return (TOKEN_REDIR_APPEND);
-	if (ft_strcmp(op, "<") == 0)
-		return (TOKEN_REDIR_IN);
-	if (ft_strcmp(op, "<<") == 0)
-		return (TOKEN_HEREDOC);
-	if (ft_strcmp(op, "|") == 0)
-		return (TOKEN_PIPE);
-	return (TOKEN_WORD);
+	return (content);
 }

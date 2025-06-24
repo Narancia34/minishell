@@ -21,14 +21,14 @@ void	handle_child(t_shell *shell, char **args,
 	signal(SIGQUIT, SIG_DFL);
 	if (redirect(o_args, here_docs) == 1)
 	{
-		free_all(shell, args, here_docs);
+		free_all(shell, args);
 		exit(EXIT_FAILURE);
 	}
 	free_here_docs(here_docs);
 	cmd_path = find_cmd_path(args[0], shell->envp, &shell->exit_s);
 	if (!cmd_path)
 	{
-		free_all(shell, args, here_docs);
+		free_all(shell, args);
 		exit(shell->exit_s);
 	}
 	handle_exec(cmd_path, args, shell);

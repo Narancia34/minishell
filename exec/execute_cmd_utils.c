@@ -12,14 +12,12 @@
 
 #include "../includes/minishell.h"
 
-void	free_all(t_shell *shell, char **args, t_here_docs *here_docs)
+void	free_all(t_shell *shell, char **args)
 {
 	free_commands(shell->input);
 	clean_up(NULL, args);
 	clean_up(NULL, shell->envp);
 	free_env(&shell->env_list);
-	if (here_docs)
-		free_here_docs(here_docs);
 }
 
 void	handle_exec(char *path, char **args, t_shell *shell)
@@ -51,7 +49,8 @@ void	exec_piped_cmd(t_shell *shell, char **args,
 		free_here_docs(here_docs);
 		exit(EXIT_FAILURE);
 	}
-	free_here_docs(here_docs);
+	if (here_docs)
+		free_here_docs(here_docs);
 	cmd_path = find_cmd_path(args[0], shell->envp, &shell->exit_s);
 	if (!cmd_path)
 	{

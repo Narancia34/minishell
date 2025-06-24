@@ -6,7 +6,7 @@
 /*   By: mlabrirh <mlabrirh@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/19 15:14:16 by mlabrirh          #+#    #+#             */
-/*   Updated: 2025/06/20 18:12:42 by mlabrirh         ###   ########.fr       */
+/*   Updated: 2025/06/24 13:57:46 by mgamraou         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -19,17 +19,6 @@ char	*get_env_value(t_env *env_list, const char *var_name)
 		if (strcmp(env_list->var_name, var_name) == 0)
 			return (env_list->var_value);
 		env_list = env_list->next;
-	}
-	return (NULL);
-}
-
-char	*get_var_list(t_var	*var_list, const char	*var_name)
-{
-	while (var_list)
-	{
-		if (strcmp(var_list->var_name, var_name) == 0)
-			return ((var_list->var_value));
-		var_list = var_list->next;
 	}
 	return (NULL);
 }

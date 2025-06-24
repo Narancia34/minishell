@@ -23,7 +23,7 @@ void	print_arg(char **arg, int i)
 	{
 		if (!first)
 			printf(" ");
-		ft_putstr_fd(arg[j], 1);
+		printf("%s", arg[j]);
 		first = 0;
 		j++;
 	}
@@ -49,6 +49,6 @@ int	ft_echo(char **arg)
 	}
 	print_arg(arg, i);
 	if (print_newline)
-		ft_putstr_fd("\n", 1);
+		printf("\n");
 	return (0);
 }

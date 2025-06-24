@@ -49,7 +49,8 @@ void	here_doc_utils_b(t_here_d *here_d,
 	free_env(&shell->env_list);
 	free_commands(shell->input);
 	clean_up(here_d->file_name, shell->envp);
-	free_here_docs(here_docs);
+	if (here_docs)
+		free_here_docs(here_docs);
 	exit(EXIT_SUCCESS);
 }
 

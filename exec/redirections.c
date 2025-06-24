@@ -18,7 +18,14 @@ int	red_out(char **args, t_redirection *fd)
 {
 	fd->fd_out = open(args[fd->i + 1], O_WRONLY | O_CREAT | O_TRUNC, 0644);
 	if (fd->fd_out == -1)
+	{
+		if (access(args[fd->i + 1], W_OK) != 0)
+		{
+			ft_putstr_fd(args[fd->i + 1], 2);
+			ft_putstr_fd(" :permission denied", 2);
+		}
 		return (1);
+	}
 	dup2(fd->fd_out, STDOUT_FILENO);
 	close(fd->fd_out);
 	fd->i += 2;
@@ -29,7 +36,19 @@ int	red_inp(char **args, t_redirection *fd)
 {
 	fd->fd_in = open(args[fd->i + 1], O_RDONLY);
 	if (fd->fd_in == -1)
+	{
+		if (access(args[fd->i + 1], F_OK) != 0)
+		{
+			ft_putstr_fd(args[fd->i + 1], 2);
+			ft_putstr_fd("no such file or directory\n", 2);
+		}
+		else if (access(args[fd->i + 1], R_OK) != 0)
+		{
+			ft_putstr_fd(args[fd->i + 1], 2);
+			ft_putstr_fd("permission denied\n", 2);
+		}
 		return (1);
+	}
 	dup2(fd->fd_in, STDIN_FILENO);
 	close(fd->fd_in);
 	fd->i += 2;
@@ -40,7 +59,14 @@ int	red_append(char **args, t_redirection *fd)
 {
 	fd->fd_out = open(args[fd->i + 1], O_WRONLY | O_CREAT | O_APPEND, 0644);
 	if (fd->fd_out == -1)
+	{
+		if (access(args[fd->i + 1], W_OK) != 0)
+		{
+			ft_putstr_fd(args[fd->i + 1], 2);
+			ft_putstr_fd(" :permission denied", 2);
+		}
 		return (1);
+	}
 	dup2(fd->fd_out, STDOUT_FILENO);
 	close(fd->fd_out);
 	fd->i += 2;
