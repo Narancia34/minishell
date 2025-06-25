@@ -290,5 +290,6 @@ void			wait_for_pipes(t_shell *shell, t_pipeline *pipeline);
 char			*make_file_name(void);
 t_here_docs		*make_heredoc_node(char *file_name);
 void			add_heredoc_node(t_here_docs **here_docs, t_here_docs *new_n);
+void			protect_cwd(t_env **env_list);
 
 #endif

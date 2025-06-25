@@ -45,6 +45,7 @@ void	innit_shell(t_shell *shell, char **env)
 
 int	ft_read_line(t_shell *shell)
 {
+	protect_cwd(&shell->env_list);
 	g_signal_flag = 0;
 	shell->rl = readline("minishell$ ");
 	if (g_signal_flag == SIGINT)
